@@ -9,6 +9,8 @@ const IndexPage = () => (
         <a>About</a>
       </Link>
     </p>
+    <p>{process.env.GRAPHQL_URL}</p>
+    <p>{process.env.ENV_LOCAL_T}</p>
   </Layout>
 )
 
