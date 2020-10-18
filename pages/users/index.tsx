@@ -1,18 +1,18 @@
 import { GetStaticProps } from 'next'
 import Link from 'next/link'
 
-import { User } from '../../interfaces'
+// import { User } from '../../interfaces'
 // import { sampleUserData } from '../../utils/sample-data'
 import Layout from '../../components/Layout'
 import List, {  ALL_POSTS_QUERY,
   allPostsQueryVars,} from '../../components/List'
 import { initializeApollo } from '../../lib/apolloClient'
 
-type Props = {
-  items: User[]
-}
+// type Props = {
+//   items: User[]
+// }
 
-const WithStaticProps = ({ items }: Props) => (
+const WithStaticProps = () => (
   <Layout title="Users List | Next.js + TypeScript Example">
     <h1>Users List</h1>
     <p>

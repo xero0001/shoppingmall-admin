@@ -1,12 +1,12 @@
 import * as React from 'react'
 import { gql, useQuery, NetworkStatus } from '@apollo/client'
 
-import ListItem from './ListItem'
-import { User } from '../interfaces'
+// import ListItem from './ListItem'
+// import { User } from '../interfaces'
 
-type Props = {
-  items: User[]
-}
+// type Props = {
+//   items: User[]
+// }
 
 export const ALL_POSTS_QUERY = gql`
   query allPosts($first: Int!, $skip: Int!) {
