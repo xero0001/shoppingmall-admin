@@ -1,5 +1,7 @@
-# TypeScript+Apollo+Next.js example
+# TypeScript+Apollo+TailwindCSS+Storybook+Next.js example
 
-Built upon Next.js with TypeScript example. Integrated with Apollo client.
+Built upon Next.js with TypeScript example and tailwindcss, storybook example. Integrated with Apollo client.
 
 <https://github.com/mui-org/material-ui/tree/master/examples/nextjs-with-typescript>
+
+<https://stackrant.com/posts/nextjs-typescript-tailwindcss-storybook-project-setup>
