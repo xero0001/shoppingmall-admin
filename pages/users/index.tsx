@@ -2,9 +2,11 @@ import { GetStaticProps } from 'next'
 import Link from 'next/link'
 
 import { User } from '../../interfaces'
-import { sampleUserData } from '../../utils/sample-data'
+// import { sampleUserData } from '../../utils/sample-data'
 import Layout from '../../components/Layout'
-import List from '../../components/List'
+import List, {  ALL_POSTS_QUERY,
+  allPostsQueryVars,} from '../../components/List'
+import { initializeApollo } from '../../lib/apolloClient'
 
 type Props = {
   items: User[]
@@ -17,7 +19,7 @@ const WithStaticProps = ({ items }: Props) => (
       Example fetching data from inside <code>getStaticProps()</code>.
     </p>
     <p>You are currently on: /users</p>
-    <List items={items} />
+    <List />
     <p>
       <Link href="/">
         <a>Go home</a>
@@ -30,8 +32,19 @@ export const getStaticProps: GetStaticProps = async () => {
   // Example for including static props in a Next.js function component page.
   // Don't forget to include the respective types for any props passed into
   // the component.
-  const items: User[] = sampleUserData
-  return { props: { items } }
+  const apolloClient = initializeApollo(null)
+
+  await apolloClient.query({
+    query: ALL_POSTS_QUERY,
+    variables: allPostsQueryVars,
+  })
+
+  return {
+    props: {
+      initialApolloState: apolloClient.cache.extract(),
+    },
+    revalidate: 1,
+  }
 }
 
 export default WithStaticProps
