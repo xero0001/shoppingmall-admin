@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 
 import Layout from '../../../../components/Layout';
 import FlatBigButton from '../../../../components/Button/FlatBigButton';
+import Loader from '../../../../components/Loader';
 
 export const PRODUCT_CATEGORY_QUERY = gql`
   query productCategory($where: Product_CategoryWhereUniqueInput!) {
@@ -106,7 +107,12 @@ const CategoriesList = ({ parentId }: any) => {
   });
 
   if (error) return <aside>카테고리 로딩에 문제가 발생하였습니다.</aside>;
-  if (loading) return <div>Loading</div>;
+  if (loading)
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
 
   const { productCategories } = data;
 

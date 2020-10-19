@@ -1,6 +1,7 @@
 import { gql, useQuery } from '@apollo/client';
 import Layout from '../../components/Layout';
 import FlatBigButton from '../../components/Button/FlatBigButton';
+import Loader from '../../components/Loader';
 
 export const PRODUCTS_QUERY = gql`
   query products($where: ProductWhereInput, $skip: Int!, $take: Int!) {
@@ -30,7 +31,12 @@ const ProductsList = () => {
   });
 
   if (error) return <aside>상품 로딩에 문제가 발생하였습니다.</aside>;
-  if (loading) return <div>Loading</div>;
+  if (loading)
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
 
   const { products } = data;
 

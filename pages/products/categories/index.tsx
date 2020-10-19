@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import Layout from '../../../components/Layout';
 import FlatBigButton from '../../../components/Button/FlatBigButton';
+import Loader from '../../../components/Loader';
 
 export const PRODUCTS_QUERY = gql`
   query productCategories($where: Product_CategoryWhereInput) {
@@ -34,7 +35,12 @@ const CategoriesList = () => {
 
   if (error) return <aside>카테고리 로딩에 문제가 발생하였습니다.</aside>;
   // if (loading && !loadingMorePosts) return <div>Loading</div>;
-  if (loading) return <div>Loading</div>;
+  if (loading)
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
 
   const { productCategories } = data;
 
