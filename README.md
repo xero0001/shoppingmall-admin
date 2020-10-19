@@ -1,4 +1,4 @@
-# TypeScript+Apollo+TailwindCSS+Storybook+Next.js example
+# Shoppingmall Admin
 
 Built upon Next.js with TypeScript example and tailwindcss, storybook example. Integrated with Apollo client.
 

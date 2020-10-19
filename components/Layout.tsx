@@ -1,41 +1,42 @@
-import React, { ReactNode } from 'react'
-import Link from 'next/link'
-import Head from 'next/head'
+import React, { ReactNode } from 'react';
+// import Link from 'next/link';
+import Head from 'next/head';
+import Nav from './View/Nav';
 
 type Props = {
-  children?: ReactNode
-  title?: string
-}
+  children?: ReactNode;
+  title?: string;
+};
 
 const Layout = ({ children, title = 'This is the default title' }: Props) => (
-  <div>
-    <Head>
-      <title>{title}</title>
-      <meta charSet="utf-8" />
-      <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-    </Head>
-    <header>
-      <nav>
-        <Link href="/">
-          <a>Home</a>
-        </Link>{' '}
-        |{' '}
-        <Link href="/about">
-          <a>About</a>
-        </Link>{' '}
-        |{' '}
-        <Link href="/users">
-          <a>Users List</a>
-        </Link>{' '}
-        | <a href="/api/users">Users API</a>
-      </nav>
-    </header>
-    {children}
-    <footer>
-      <hr />
-      <span>I'm here to stay (Footer)</span>
-    </footer>
-  </div>
-)
+  <>
+    <style jsx>{`
+      .nav {
+        width: 256px;
+        min-width: 256px;
+        order: 1;
+      }
+      .content {
+        order: 2;
+      }
+    `}</style>
+    <main className="w-full">
+      <div className="flex">
+        <Head>
+          <title>{title}</title>
+          <meta charSet="utf-8" />
+          <meta
+            name="viewport"
+            content="initial-scale=1.0, width=device-width"
+          />
+        </Head>
+        <div className="nav border-r border-gray-300">
+          <Nav />
+        </div>
+        <div className="content w-full">{children}</div>
+      </div>
+    </main>
+  </>
+);
 
-export default Layout
+export default Layout;

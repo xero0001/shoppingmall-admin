@@ -25,6 +25,7 @@
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.1.0",
     "postcss-preset-env": "^6.7.0",
+    "prettier": "^2.1.2",
     "react-docgen-typescript-loader": "^3.7.2",
     "tailwindcss": "^1.9.4",
     "typescript": "4.0"
