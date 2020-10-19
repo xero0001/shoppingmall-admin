@@ -1,4 +1,4 @@
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from '@apollo/client';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -7,8 +7,8 @@ import FlatBigButton from '../../../../components/Button/FlatBigButton';
 import InputString from '../../../../components/Input/InputString';
 import Loader from '../../../../components/Loader';
 
-export const PRODUCT_CATEGORY_MUTATION = gql`
-  query createOneProduct_Category($data: ProductCreateInput!) {
+export const CREATE_ONE_PRODUCT_CATEGORY_MUTATION = gql`
+  mutation createOneProduct_Category($data: ProductCreateInput!) {
     createOneProduct_Category(data: $data) {
       id
       name
@@ -36,15 +36,6 @@ export const PRODUCT_CATEGORIES_QUERY = gql`
     }
   }
 `;
-
-// export const queryVars = {
-//   where: null,
-// };
-
-// type User = {
-//   id: number;
-//   name: string;
-// };
 
 const CategoryItems = ({
   value,
@@ -87,9 +78,9 @@ const CategoryItems = ({
                       <g
                         id="Icons"
                         stroke="none"
-                        stroke-width="1"
+                        strokeWidth="1"
                         fill="none"
-                        fill-rule="evenodd"
+                        fillRule="evenodd"
                       >
                         <g
                           id="Rounded"
@@ -192,19 +183,13 @@ const CategoryList = ({
   );
 };
 
-const CategoryForm = () => {
+const CategoryForm = ({ state, setState }: any) => {
   const queryVars = {
     orderBy: [{ parentId: 'asc' }, { order: 'asc' }],
   };
 
   const { loading, error, data } = useQuery(PRODUCT_CATEGORIES_QUERY, {
     variables: queryVars,
-  });
-
-  const [state, setState] = useState({
-    name: '',
-    slug: '',
-    parentId: -1,
   });
 
   const handleChange = (name: string, value: any) => {
@@ -267,6 +252,40 @@ const CategoryForm = () => {
 };
 
 const IndexPage = () => {
+  const [state, setState] = useState({
+    name: '',
+    slug: '',
+    parentId: -1,
+  });
+
+  const queryVars = {
+    data: {
+      ...state,
+      parent:
+        state.parentId === -1
+          ? {
+              connect: {
+                id: null,
+              },
+            }
+          : {
+              connect: {
+                id: state.parentId,
+              },
+            },
+    },
+  };
+
+  const [createOneProductCategoryMutation, { data }] = useMutation(
+    CREATE_ONE_PRODUCT_CATEGORY_MUTATION,
+    {
+      variables: queryVars,
+      onCompleted: () => {
+        console.log(data);
+      },
+    }
+  );
+
   return (
     <Layout title="상품 - 카테고리">
       <div className="px-4 py-8">
@@ -297,12 +316,12 @@ const IndexPage = () => {
               label="생성"
               colored={true}
               onClick={() => {
-                // createProductCategory();
+                createOneProductCategoryMutation();
               }}
             />
           </div>
         </div>
-        <CategoryForm />
+        <CategoryForm state={state} setState={setState} />
       </div>
     </Layout>
   );

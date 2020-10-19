@@ -27,8 +27,19 @@ const NavButton = ({ label, href, onClick, colored = true }: Props) => {
         </Link>
       );
     }
+  } else if (onClick) {
+    return (
+      <button
+        onClick={() => {
+          onClick();
+        }}
+        className="border border-solid border-magenta-400 bg-magenta-400 text-white py-3 w-48 text-base rounded flex flex-column items-center justify-center font-bold"
+      >
+        <span>{label}</span>
+      </button>
+    );
   } else {
-    return <button onClick={() => onClick}>{label}</button>;
+    return <span>{label}</span>;
   }
 };
 
