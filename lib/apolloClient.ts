@@ -12,7 +12,8 @@ function createApolloClient() {
       // uri: 'https://nextjs-graphql-with-prisma-simple.vercel.app/api', // Server URL (must be absolute)
       uri: process.env.GRAPHQL_URL,
       // credentials: 'same-origin', // Additional fetch() options like `credentials` or `headers`
-      credentials: 'include',
+      // credentials: 'include',
+      // credentials:true,
     }),
     cache: new InMemoryCache({
       typePolicies: {
