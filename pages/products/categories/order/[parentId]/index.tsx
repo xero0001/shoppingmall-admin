@@ -3,11 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import Layout from '../../../../components/Layout';
-import FlatBigButton from '../../../../components/Button/FlatBigButton';
-import Loader from '../../../../components/Loader';
-import { ArrowUp, ArrowDown } from '../../../../components/Icons/Arrow';
-import { PRODUCT_CATEGORIES_QUERY } from '../index';
+import Layout from '../../../../../components/Layout';
+import FlatBigButton from '../../../../../components/Button/FlatBigButton';
+import Loader from '../../../../../components/Loader';
+import { ArrowUp, ArrowDown } from '../../../../../components/Icons/Arrow';
+import { PRODUCT_CATEGORY_QUERY, PRODUCT_CATEGORIES_QUERY } from '../../index';
 
 export const REORDER_PRODUCT_CATEGORY_MUTATION = gql`
   mutation reorderProduct_Category(
@@ -18,17 +18,19 @@ export const REORDER_PRODUCT_CATEGORY_MUTATION = gql`
   }
 `;
 
-export const queryVars = {
-  where: {
-    parentId: {
-      equals: null,
-    },
-  },
-  orderBy: [{ order: 'asc' }],
-};
-
 const CategoriesOrderForm = ({ router, constructor }: any) => {
   const [state, setState] = useState([...constructor]);
+  const { parentId } = router.query;
+  const pid = parseInt(parentId);
+
+  const queryVars = {
+    where: {
+      parentId: {
+        equals: pid,
+      },
+    },
+    orderBy: [{ order: 'asc' }],
+  };
 
   const [reorderProductCategoryMutation] = useMutation(
     REORDER_PRODUCT_CATEGORY_MUTATION,
@@ -72,13 +74,13 @@ const CategoriesOrderForm = ({ router, constructor }: any) => {
     reorderProductCategoryMutation({
       variables: {
         where: {
-          parentId: -1,
+          parentId: pid,
         },
         order: order,
       },
       update: (_, { data: { reorderProduct_Category } }) => {
         if (reorderProduct_Category === 0) {
-          router.push('/products/categories');
+          router.push('/products/categories/' + pid);
         }
       },
     });
@@ -164,6 +166,14 @@ const QueryWrap = ({ args, router }: any) => {
     errorPolicy: 'all',
   });
 
+  if (Object.keys(router.query).length === 0) {
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
+  }
+
   if (query.error) return <aside>데이터 로딩에 문제가 발생하였습니다.</aside>;
   if (query.loading)
     return (
@@ -179,13 +189,33 @@ const QueryWrap = ({ args, router }: any) => {
   );
 };
 
+const ParentCategory = ({ parentId }: any) => {
+  const queryVars = {
+    where: {
+      id: parseInt(parentId),
+    },
+  };
+
+  const { loading, error, data } = useQuery(PRODUCT_CATEGORY_QUERY, {
+    variables: queryVars,
+  });
+
+  if (error) return <></>;
+  if (loading) return <></>;
+
+  const { productCategory } = data;
+
+  return <>{productCategory.name}</>;
+};
+
 const IndexPage = () => {
   const router = useRouter();
+  const { parentId } = router.query;
 
   const args = {
     where: {
       parentId: {
-        equals: null,
+        equals: parseInt(parentId as string),
       },
     },
     orderBy: [{ order: 'asc' }],
@@ -195,7 +225,7 @@ const IndexPage = () => {
     <Layout title="상품 - 카테고리">
       <div className="px-4 py-8">
         <div className="w-full items-center mb-4">
-          <Link href="/products/categories">
+          <Link href={'/products/categories/' + parentId}>
             <a>
               <div className="text-base font-bold text-gray-500 mb-2">
                 {'<'} 뒤로가기
@@ -204,7 +234,8 @@ const IndexPage = () => {
           </Link>
           <div className="text-2xl font-bold flex flex-row">
             <span>
-              상품 {'>'} 카테고리 {'>'} 순서변경
+              상품 {'>'} 카테고리 {'>'} 순서변경 :{' '}
+              {parentId && <ParentCategory parentId={parentId} />}
             </span>
           </div>
         </div>

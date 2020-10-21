@@ -1,4 +1,10 @@
-const InputString = ({ value, handleChange, label, name }: any) => {
+const InputString = ({
+  value,
+  handleChange,
+  label,
+  name,
+  required = false,
+}: any) => {
   return (
     <>
       <div className="font-bold text-gray-600 text-sm">{label}</div>
@@ -8,6 +14,7 @@ const InputString = ({ value, handleChange, label, name }: any) => {
         onChange={(e) => handleChange(name, e.target.value)}
         placeholder={label}
         name={name}
+        required={required}
       />
     </>
   );

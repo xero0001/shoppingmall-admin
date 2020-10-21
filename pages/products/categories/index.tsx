@@ -5,9 +5,27 @@ import Layout from '../../../components/Layout';
 import FlatBigButton from '../../../components/Button/FlatBigButton';
 import Loader from '../../../components/Loader';
 
-export const PRODUCTS_QUERY = gql`
-  query productCategories($where: Product_CategoryWhereInput) {
-    productCategories(where: $where) {
+export const PRODUCT_CATEGORY_QUERY = gql`
+  query productCategory($where: Product_CategoryWhereUniqueInput!) {
+    productCategory(where: $where) {
+      id
+      name
+      slug
+      order
+      parentId
+      child {
+        id
+      }
+    }
+  }
+`;
+
+export const PRODUCT_CATEGORIES_QUERY = gql`
+  query productCategories(
+    $where: Product_CategoryWhereInput
+    $orderBy: [Product_CategoryOrderByInput!]
+  ) {
+    productCategories(where: $where, orderBy: $orderBy) {
       id
       name
       slug
@@ -26,10 +44,11 @@ export const queryVars = {
       equals: null,
     },
   },
+  orderBy: [{ order: 'asc' }],
 };
 
 const CategoriesList = () => {
-  const { loading, error, data } = useQuery(PRODUCTS_QUERY, {
+  const { loading, error, data } = useQuery(PRODUCT_CATEGORIES_QUERY, {
     variables: queryVars,
   });
 
@@ -52,24 +71,30 @@ const CategoriesList = () => {
       {productCategories.map((category: any) => (
         <li key={category.id}>
           <div className="flex h-16 items-center justify-center border-b border-gray-400">
-            <span style={{ flex: 3 }}>{category.name}</span>
+            <span style={{ flex: 3 }}>
+              <Link href={'/products/categories/edit/' + category.id}>
+                <a>{category.name}</a>
+              </Link>
+            </span>
             <span style={{ flex: 1 }}>{category.slug}</span>
             <span style={{ flex: 1 }}>
               {category.child.length ? (
-                <a href={'categories/' + category.id}>
-                  <div
-                    className="bg-gray-200 rounded-md text-magenta-400 font-bold py-3
-                  text-center"
-                  >
-                    하위 카테고리 보기
-                    <span
-                      className="text-xs rounded-full bg-gray-500 px-2 py-1 ml-2
-                    inline-block text-white"
-                    >
-                      {category.child.length}
-                    </span>
-                  </div>
-                </a>
+                <FlatBigButton
+                  label={
+                    <>
+                      하위 카테고리
+                      <span
+                        className="text-xs rounded-full bg-gray-500 px-2 py-1 ml-2
+                         inline-block text-white"
+                      >
+                        {category.child.length}
+                      </span>
+                    </>
+                  }
+                  colored={false}
+                  href={'/products/categories/' + category.id}
+                  size="full"
+                />
               ) : (
                 <></>
               )}

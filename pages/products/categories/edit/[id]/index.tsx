@@ -3,20 +3,38 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import Layout from '../../../../components/Layout';
-import FlatBigButton from '../../../../components/Button/FlatBigButton';
-import InputString from '../../../../components/Input/InputString';
-import Loader from '../../../../components/Loader';
+import Layout from '../../../../../components/Layout';
+import FlatBigButton from '../../../../../components/Button/FlatBigButton';
+import InputString from '../../../../../components/Input/InputString';
+import Loader from '../../../../../components/Loader';
 
-import { PRODUCT_CATEGORIES_QUERY } from '../index';
+import { PRODUCT_CATEGORY_QUERY, PRODUCT_CATEGORIES_QUERY } from '../../index';
 
-export const CREATE_ONE_PRODUCT_CATEGORY_MUTATION = gql`
-  mutation createOneProduct_Category(
+export const DELETE_ONE_PRODUCT_CATEGORY_MUTATION = gql`
+  mutation deleteOneProduct_Category($where: IdCustomWhere!) {
+    deleteOneProduct_Category(where: $where) {
+      id
+      name
+      slug
+      order
+      parentId
+    }
+  }
+`;
+
+export const UPDATE_ONE_PRODUCT_CATEGORY_MUTATION = gql`
+  mutation updateOneProduct_Category(
+    $where: IdCustomWhere!
     $name: String!
     $slug: String!
     $parentId: Int!
   ) {
-    createOneProduct_Category(name: $name, slug: $slug, parentId: $parentId) {
+    updateOneProduct_Category(
+      name: $name
+      slug: $slug
+      parentId: $parentId
+      where: $where
+    ) {
       id
       name
       slug
@@ -36,6 +54,7 @@ const CategoryItems = ({
   depth,
   name,
   handleChange,
+  self,
 }: any) => {
   return (
     <>
@@ -44,12 +63,21 @@ const CategoryItems = ({
           return (
             <li key={category.id}>
               <div
-                className={`flex py-2 px-4 items-center justify-start border-b
-                  border-gray-400 cursor-pointer ${
-                    value === category.id && 'text-white bg-gray-600 font-bold'
-                  }`}
+                className={`flex py-2 px-4 items-center justify-start border-b border-gray-400 
+                    ${
+                      value === category.id &&
+                      'text-white bg-gray-600 font-bold'
+                    }
+                    ${
+                      self === category.id
+                        ? 'bg-gray-200 text-gray-400 cursor-default'
+                        : 'cursor-pointer'
+                    }
+                  `}
                 onClick={() => {
-                  handleChange('parentId', category.id);
+                  if (self !== category.id) {
+                    handleChange('parentId', category.id);
+                  }
                 }}
               >
                 {depth > 1 && (
@@ -92,10 +120,14 @@ const CategoryItems = ({
                                 <path
                                   d="M18.29,15.71 L13.71,20.29 C13.32,20.68 12.68,20.68 12.29,20.29 C11.9,19.9 11.9,19.26 12.29,18.87 L15.17,16 L5,16 C4.45,16 4,15.55 4,15 L4,5 C4,4.45 4.45,4 5,4 C5.55,4 6,4.45 6,5 L6,14 L15.17,14 L12.29,11.13 C11.9,10.74 11.9,10.1 12.29,9.71 C12.68,9.32 13.32,9.32 13.71,9.71 L18.29,14.29 C18.68,14.68 18.68,15.32 18.29,15.71 Z"
                                   id="🔹-Icon-Color"
-                                  // fill="#1D1D1D"
                                   fill={`${
-                                    value === category.id ? 'white' : 'black'
-                                  }`}
+                                    self === category.id
+                                      ? '#cbd5e0'
+                                      : value === category.id
+                                      ? 'white'
+                                      : 'black'
+                                  }
+                                  `}
                                 />
                               </g>
                             </g>
@@ -116,6 +148,7 @@ const CategoryItems = ({
                     depth={depth + 1}
                     name={name}
                     handleChange={handleChange}
+                    self={self}
                   />
                 </ul>
               )}
@@ -135,6 +168,7 @@ const CategoryList = ({
   name,
   label,
   categories,
+  self,
 }: any) => {
   return (
     <>
@@ -165,6 +199,7 @@ const CategoryList = ({
             depth={0}
             name={name}
             handleChange={handleChange}
+            self={self}
           />
         </ul>
       </div>
@@ -172,30 +207,66 @@ const CategoryList = ({
   );
 };
 
-const CategoryForm = ({ router }: any) => {
+const CategoryForm = ({ router, constructor }: any) => {
   const [state, setState] = useState({
-    name: '',
-    slug: '',
-    parentId: -1,
+    name: constructor.name,
+    slug: constructor.slug,
+    parentId: constructor.parentId === null ? -1 : constructor.parentId,
   });
 
   const queryVars = {
     orderBy: [{ parentId: 'asc' }, { order: 'asc' }],
   };
 
-  const query = useQuery(PRODUCT_CATEGORIES_QUERY, {
-    variables: queryVars,
-  });
-
-  const [createOneProductCategoryMutation, { error }] = useMutation(
-    CREATE_ONE_PRODUCT_CATEGORY_MUTATION,
+  const [deleteOneProductCategoryMutation] = useMutation(
+    DELETE_ONE_PRODUCT_CATEGORY_MUTATION,
     {
       variables: {
-        ...state,
+        where: {
+          id: constructor.id,
+        },
       },
       errorPolicy: 'all',
       refetchQueries: [
-        { query: PRODUCT_CATEGORIES_QUERY, variables: queryVars },
+        {
+          query: PRODUCT_CATEGORIES_QUERY,
+          variables: queryVars,
+        },
+        {
+          query: PRODUCT_CATEGORIES_QUERY,
+          variables: {
+            where: {
+              parentId: {
+                equals: constructor.parentId,
+              },
+            },
+            orderBy: [{ order: 'asc' }],
+          },
+        },
+      ],
+    }
+  );
+
+  const [updateOneProductCategoryMutation] = useMutation(
+    UPDATE_ONE_PRODUCT_CATEGORY_MUTATION,
+    {
+      errorPolicy: 'all',
+      refetchQueries: [
+        {
+          query: PRODUCT_CATEGORIES_QUERY,
+          variables: queryVars,
+        },
+        {
+          query: PRODUCT_CATEGORIES_QUERY,
+          variables: {
+            where: {
+              parentId: {
+                equals: constructor.parentId,
+              },
+            },
+            orderBy: [{ order: 'asc' }],
+          },
+        },
         {
           query: PRODUCT_CATEGORIES_QUERY,
           variables: {
@@ -210,6 +281,10 @@ const CategoryForm = ({ router }: any) => {
       ],
     }
   );
+
+  const query = useQuery(PRODUCT_CATEGORIES_QUERY, {
+    variables: queryVars,
+  });
 
   const handleChange = (name: string, value: any) => {
     interface ComponentState {
@@ -234,41 +309,46 @@ const CategoryForm = ({ router }: any) => {
 
   const { productCategories } = query.data;
 
-  const handleSubmit = () => {
-    createOneProductCategoryMutation({
-      update: (_, { data: { createOneProduct_Category } }) => {
-        // cache.modify({
-        //   fields: {
-        //     productCategories(existingProductCategories = []) {
-        //       const newProductCategoryRef = cache.writeFragment({
-        //         data: createOneProduct_Category,
-        //         fragment: gql`
-        //           fragment NewProduct_Category on Product_Category {
-        //             id
-        //             name
-        //             slug
-        //             order
-        //             parentId
-        //             child {
-        //               id
-        //             }
-        //           }
-        //         `,
-        //       });
-        //       return [...existingProductCategories, newProductCategoryRef];
-        //     },
-        //   },
-        // });
-        if (createOneProduct_Category.parentId === null) {
-          router.push('/products/categories');
+  const handleDelete = () => {
+    deleteOneProductCategoryMutation({
+      update: (_, { data: { deleteOneProduct_Category } }) => {
+        if (deleteOneProduct_Category.parentId === null) {
+          router.push('/products/categories/');
         } else {
           router.push(
-            '/products/categories/' + createOneProduct_Category.parentId
+            '/products/categories/' + deleteOneProduct_Category.parentId
           );
         }
       },
     });
   };
+
+  const handleSubmit = () => {
+    const mutationVars = {
+      where: {
+        id: constructor.id,
+      },
+      ...state,
+    };
+
+    console.log(mutationVars);
+
+    updateOneProductCategoryMutation({
+      variables: mutationVars,
+      // update: (cache, { data: { updateOneProduct_Category } }) => {
+      //   console.log('Success');
+      //   console.log(updateOneProduct_Category);
+      //   // if (deleteOneProduct_Category.parentId === null) {
+      //   //   router.push('/products/categories/');
+      //   // } else {
+      //   //   router.push(
+      //   //     '/products/categories/' + deleteOneProduct_Category.parentId
+      //   //   );
+      //   // }
+      // },
+    });
+  };
+  // console.log(error);
 
   return (
     <form
@@ -278,6 +358,9 @@ const CategoryForm = ({ router }: any) => {
       }}
     >
       <div className="flex flex-row justify-end items-center">
+        <div className="mr-auto">
+          <FlatBigButton label="삭제" colored={true} onClick={handleDelete} />
+        </div>
         <div>
           <FlatBigButton
             label="취소"
@@ -286,21 +369,9 @@ const CategoryForm = ({ router }: any) => {
           />
         </div>
         <div className="ml-2">
-          <FlatBigButton label="생성" colored={true} type="submit" />
+          <FlatBigButton label="수정" colored={true} type="submit" />
         </div>
       </div>
-      {error &&
-        error.graphQLErrors.map(({ message }, i) => {
-          if (message === 'duplicate') {
-            return (
-              <div key={i} className="text-red-700 text-center block mt-8">
-                *중복되는 슬러그가 있습니다. 다른 슬러그를 입력해주세요.
-              </div>
-            );
-          } else {
-            return <></>;
-          }
-        })}
       <div className="py-4 mt-4">
         <div className="max-w-sm mx-auto block">
           <div className="block">
@@ -331,6 +402,7 @@ const CategoryForm = ({ router }: any) => {
               name="parentId"
               label="상위 카테고리"
               categories={productCategories}
+              self={constructor.id}
             />
           </div>
         </div>
@@ -339,14 +411,92 @@ const CategoryForm = ({ router }: any) => {
   );
 };
 
+const QueryWrap = ({ args, router }: any) => {
+  const queryVars = args;
+
+  const query = useQuery(PRODUCT_CATEGORY_QUERY, {
+    variables: queryVars,
+    errorPolicy: 'all',
+  });
+
+  if (Object.keys(router.query).length === 0) {
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (query.error) return <aside>데이터 로딩에 문제가 발생하였습니다.</aside>;
+  if (query.loading)
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
+
+  const { productCategory } = query.data;
+
+  return <CategoryForm router={router} constructor={productCategory} />;
+};
+
+const ParentLocation = (id: string) => {
+  const queryVars = {
+    where: {
+      id: parseInt(id),
+    },
+  };
+
+  const { loading, error, data } = useQuery(PRODUCT_CATEGORY_QUERY, {
+    variables: queryVars,
+  });
+
+  if (error) return '';
+  if (loading) return '';
+
+  const { productCategory } = data;
+
+  if (!productCategory || productCategory.parentId === null) {
+    return '';
+  }
+
+  return productCategory.parentId.toString();
+};
+
+const CurrentLocation = ({ id }: any) => {
+  const queryVars = {
+    where: {
+      id: parseInt(id as string),
+    },
+  };
+
+  const { loading, error, data } = useQuery(PRODUCT_CATEGORY_QUERY, {
+    variables: queryVars,
+  });
+
+  if (error) return <></>;
+  if (loading) return <></>;
+
+  const { productCategory } = data;
+
+  return <>{productCategory.name}</>;
+};
+
 const IndexPage = () => {
   const router = useRouter();
+  const { id } = router.query;
+
+  const args = {
+    where: {
+      id: parseInt(id as string),
+    },
+  };
 
   return (
     <Layout title="상품 - 카테고리">
       <div className="px-4 py-8">
         <div className="w-full items-center mb-4">
-          <Link href="/products/categories">
+          <Link href={'/products/categories/' + ParentLocation(id as string)}>
             <a>
               <div className="text-base font-bold text-gray-500 mb-2">
                 {'<'} 뒤로가기
@@ -355,11 +505,12 @@ const IndexPage = () => {
           </Link>
           <div className="text-2xl font-bold flex flex-row">
             <span>
-              상품 {'>'} 카테고리 {'>'} 추가하기
+              상품 {'>'} 카테고리 {'>'} 수정하기:{' '}
+              {id && <CurrentLocation id={id as string} />}
             </span>
           </div>
         </div>
-        <CategoryForm router={router} />
+        <QueryWrap args={args} router={router} />
       </div>
     </Layout>
   );
