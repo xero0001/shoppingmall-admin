@@ -20,6 +20,10 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => (
         order: 2;
       }
     `}</style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
     <main className="w-full">
       <div className="flex">
         <Head>

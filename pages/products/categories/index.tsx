@@ -140,7 +140,7 @@ const IndexPage = () => (
       <div className="py-4 mt-4">
         <ul>
           <li>
-            <div className="py-4 border-t border-b border-gray-400 flex flex-row items-center">
+            <div className="py-4 border-t border-b-2 border-gray-400 flex flex-row items-center">
               <span style={{ flex: 3 }} className="text-gray-500">
                 카테고리 이름
               </span>

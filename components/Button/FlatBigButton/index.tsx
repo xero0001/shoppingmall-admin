@@ -23,7 +23,7 @@ const NavButton = ({
   if (disabled) {
     return (
       <div
-        className={`border border-solid py-3 w-48 text-base rounded flex flex-column items-center justify-center font-boldr transition duration-100 ease-in-out ${
+        className={`border border-solid py-3 w-48 text-base rounded flex flex-column items-center justify-center font-bold transition duration-100 ease-in-out ${
           colored
             ? 'border-magenta-400 bg-magenta-400 text-white'
             : 'border-gray-100 bg-gray-100 text-white'

@@ -1,4 +1,4 @@
-const InputString = ({
+const InputProduct = ({
   value,
   handleChange,
   label,
@@ -12,16 +12,7 @@ const InputString = ({
       <input
         className="rounded-md border border-gray-400 py-2 px-4 w-full"
         value={value}
-        onChange={(e: any) =>
-          handleChange(
-            name,
-            type === 'number'
-              ? e.target.value === ''
-                ? 0
-                : parseInt(e.target.value)
-              : e.target.value
-          )
-        }
+        onChange={(e) => handleChange(name, e.target.value)}
         placeholder={label}
         name={name}
         type={type}
@@ -31,4 +22,4 @@ const InputString = ({
   );
 };
 
-export default InputString;
+export default InputProduct;

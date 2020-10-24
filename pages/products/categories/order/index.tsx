@@ -101,7 +101,7 @@ const CategoriesOrderForm = ({ router, constructor }: any) => {
       <div className="py-4 mt-4">
         <ul>
           <li>
-            <div className="py-4 border-t border-b border-gray-400 flex flex-row items-center">
+            <div className="py-4 border-t border-b-2 border-gray-400 flex flex-row items-center">
               <span style={{ width: '200px' }} className="text-gray-500">
                 순서 편집
               </span>
