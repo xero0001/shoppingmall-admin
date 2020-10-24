@@ -313,8 +313,6 @@ const ProductForm = ({ router }: any) => {
     items: [],
   });
 
-  console.log(state);
-
   const queryVars = {
     orderBy: [{ parentId: 'asc' }, { order: 'asc' }],
   };
