@@ -1,116 +1,165 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
+const AWS = require('aws-sdk');
 
-import { schema } from 'prosemirror-schema-basic';
-import { addListNodes } from 'prosemirror-schema-list';
-import { EditorView, Decoration, DecorationSet } from 'prosemirror-view';
-import { Schema, DOMParser } from 'prosemirror-model';
+import { RemirrorProvider, useRemirror } from 'remirror/react';
 
-import { keymap } from 'prosemirror-keymap';
-import { undo, redo, history } from 'prosemirror-history';
-import { baseKeymap } from 'prosemirror-commands';
-import { EditorState, Plugin, PluginKey } from 'prosemirror-state';
+const Menu = () => {
+  const { commands, active } = useRemirror({ autoUpdate: true });
 
-import { dropCursor } from 'prosemirror-dropcursor';
-import { gapCursor } from 'prosemirror-gapcursor';
-import { menuBar } from 'prosemirror-menu';
+  const imageRef: any = useRef();
 
-import { buildKeymap } from './keymap';
-import { buildMenuItems } from './menu';
-import { buildInputRules } from './inputrules';
+  const handleUpload = (e: any) => {
+    e.preventDefault();
 
-const reactPropsKey = new PluginKey('reactProps');
+    if (!e.target.files.length) {
+      return alert('파일을 선택해주세요');
+    }
 
-const ReactProps = (initialProps: any) => {
-  return new Plugin({
-    key: reactPropsKey,
-    state: {
-      // init: () => initialProps,
-      init: () => {
-        return DecorationSet.empty;
-      },
-      // apply: (tr, prev) => tr.getMeta(reactPropsKey) || prev,
-      apply: (tr, set) => {
-        // Adjust decoration positions to changes made by the transaction
-        set = set.map(tr.mapping, tr.doc);
-        // See if the transaction adds or removes any placeholders
-        let action = tr.getMeta(reactPropsKey);
-        if (action && action.add) {
-          let widget = document.createElement('placeholder');
-          let deco = Decoration.widget(action.add.pos, widget, {
-            id: action.add.id,
-          });
-          set = set.add(tr.doc, [deco]);
-        } else if (action && action.remove) {
-          set = set.remove(
-            set.find(null, null, (spec: any) => spec.id == action.remove.id)
-          );
-        }
+    const today = new Date();
+    const file = e.target.files[0];
+    const fileName =
+      today.getFullYear().toString() +
+      (today.getMonth() + 1).toString() +
+      today.getDate().toString() +
+      today.getHours().toString() +
+      today.getMinutes().toString() +
+      today.getSeconds().toString() +
+      file.name;
 
-        return set;
-      },
-    },
-    props: {
-      decorations(state: any) {
-        let doc = state.doc;
-        if (
-          doc.childCount == 1 &&
-          doc.firstChild.isTextblock &&
-          doc.firstChild.content.size == 0
-        ) {
-          var container = document.createElement('span');
-          const newNode = document.createTextNode('상품 상세를 입력하세요...');
+    const albumBucketName = process.env.AWS_S3_BUCKET_NAME;
+    const bucketRegion = process.env.AWS_REGION;
+    const IdentityPoolId = process.env.AWS_IDPOOL_ID;
 
-          container.appendChild(newNode);
-          container.style.color = '#a0aec0';
-
-          return DecorationSet.create(doc, [Decoration.widget(1, container)]);
-        }
-      },
-    },
-  });
-};
-
-const Editor = (props: any) => {
-  const viewHost: any = useRef();
-  const view: any = useRef(null);
-
-  useEffect(() => {
-    const mySchema = new Schema({
-      nodes: addListNodes(
-        schema.spec.nodes as any,
-        'paragraph block*',
-        'block'
-      ),
-      marks: schema.spec.marks,
+    AWS.config.update({
+      region: bucketRegion,
+      credentials: new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: IdentityPoolId,
+      }),
     });
 
-    const plugins = [
-      ReactProps(props),
-      buildInputRules(mySchema),
-      history(),
-      keymap(buildKeymap(mySchema, { 'Mod-z': undo, 'Mod-y': redo })),
-      keymap(baseKeymap),
-      dropCursor(),
-      gapCursor(),
-      menuBar({ floating: false, content: buildMenuItems(mySchema).fullMenu }),
-    ];
-    // initial render
-    const state = EditorState.create({
-      schema: mySchema,
-      plugins,
+    var s3 = new AWS.S3({
+      apiVersion: '2006-03-01',
+      params: { Bucket: albumBucketName },
     });
-    view.current = new EditorView(viewHost.current, { state });
-    return () => view.current.destroy();
-  }, []);
 
-  useEffect(() => {
-    // every render
-    const tr = view.current.state.tr.setMeta(reactPropsKey, props);
-    view.current.dispatch(tr);
-  });
+    var albumPhotosKey =
+      encodeURIComponent('images') + '/' + encodeURIComponent('products') + '/';
+
+    var photoKey = albumPhotosKey + fileName;
+    s3.upload(
+      {
+        Key: photoKey,
+        Body: file,
+        ACL: 'public-read',
+      },
+      function (err: any, data: any) {
+        if (err) {
+          return alert('업로드에 문제가 발생하였습니다: ' + err.message);
+        }
+        alert('업로드에 성공하였습니다.');
+        commands.insertImage({
+          src: data.Location,
+          width: '100%',
+          align: 'center',
+        });
+      }
+    );
+  };
 
   return (
+    <div className="menu border-b-2 border-gray-400 px-4 py-2 rounded-t-md">
+      <button
+        onClick={() => commands.toggleBold()}
+        className={`${
+          active.bold() ? 'text-black' : 'text-gray-600'
+        } hover:text-black`}
+        style={{ color: active.bold() ? 'bold' : undefined }}
+        type="button"
+      >
+        <svg
+          fill="currentColor"
+          preserveAspectRatio="xMidYMid meet"
+          height="1rem"
+          width="1rem"
+          aria-hidden="true"
+          viewBox="0 0 384 512"
+        >
+          <path d="M333.49 238a122 122 0 0027-65.21C367.87 96.49 308 32 233.42 32H34a16 16 0 00-16 16v48a16 16 0 0016 16h31.87v288H34a16 16 0 00-16 16v48a16 16 0 0016 16h209.32c70.8 0 134.14-51.75 141-122.4 4.74-48.45-16.39-92.06-50.83-119.6zM145.66 112h87.76a48 48 0 010 96h-87.76zm87.76 288h-87.76V288h87.76a56 56 0 010 112z"></path>
+        </svg>
+      </button>
+      <button
+        onClick={() => commands.toggleItalic()}
+        className={`${
+          active.italic() ? 'text-black' : 'text-gray-600'
+        } ml-3 hover:text-black`}
+        type="button"
+      >
+        <svg
+          fill="currentColor"
+          preserveAspectRatio="xMidYMid meet"
+          height="1em"
+          width="1em"
+          aria-hidden="true"
+          viewBox="0 0 320 512"
+        >
+          <path d="M320 48v32a16 16 0 01-16 16h-62.76l-80 320H208a16 16 0 0116 16v32a16 16 0 01-16 16H16a16 16 0 01-16-16v-32a16 16 0 0116-16h62.76l80-320H112a16 16 0 01-16-16V48a16 16 0 0116-16h192a16 16 0 0116 16z"></path>
+        </svg>
+      </button>
+      <button
+        onClick={() => commands.toggleUnderline()}
+        className={`${
+          active.underline() ? 'text-black' : 'text-gray-600'
+        } ml-3 hover:text-black`}
+        type="button"
+      >
+        <svg
+          fill="currentColor"
+          preserveAspectRatio="xMidYMid meet"
+          height="1em"
+          width="1em"
+          aria-hidden="true"
+          viewBox="0 0 448 512"
+        >
+          <path d="M32 64h32v160c0 88.22 71.78 160 160 160s160-71.78 160-160V64h32a16 16 0 0016-16V16a16 16 0 00-16-16H272a16 16 0 00-16 16v32a16 16 0 0016 16h32v160a80 80 0 01-160 0V64h32a16 16 0 0016-16V16a16 16 0 00-16-16H32a16 16 0 00-16 16v32a16 16 0 0016 16zm400 384H16a16 16 0 00-16 16v32a16 16 0 0016 16h416a16 16 0 0016-16v-32a16 16 0 00-16-16z"></path>
+        </svg>
+      </button>
+      <div className="inline-block ml-6">
+        <input
+          type="file"
+          name="insertImage"
+          accept="image/*"
+          value=""
+          onChange={handleUpload}
+          className="hidden"
+          ref={imageRef}
+        />
+        <svg
+          fill="currentColor"
+          preserveAspectRatio="xMidYMid meet"
+          height="1em"
+          width="1.5em"
+          aria-hidden="true"
+          viewBox="0 0 448 512"
+          className="text-gray-600 cursor-pointer hover:text-black"
+          onClick={() => imageRef.current.click()}
+        >
+          <path d="M480 416v16c0 26.51-21.49 48-48 48H48c-26.51 0-48-21.49-48-48V176c0-26.51 21.49-48 48-48h16v208c0 44.112 35.888 80 80 80h336zm96-80V80c0-26.51-21.49-48-48-48H144c-26.51 0-48 21.49-48 48v256c0 26.51 21.49 48 48 48h384c26.51 0 48-21.49 48-48zM256 128c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-96 144l55.515-55.515c4.686-4.686 12.284-4.686 16.971 0L272 256l135.515-135.515c4.686-4.686 12.284-4.686 16.971 0L512 208v112H160v-48z" />
+        </svg>
+      </div>
+    </div>
+  );
+};
+
+const RemirrorWrapper = ({
+  label,
+  name,
+  value,
+  manager,
+  handleChange,
+}: any) => {
+  return (
     <>
+      <div className="font-bold text-gray-600 text-sm">{label as string}</div>
       <style global jsx>{`
         .ProseMirror {
           position: relative;
@@ -452,8 +501,19 @@ const Editor = (props: any) => {
         }
 
         .ProseMirror {
-          padding: 4px 8px 4px 14px;
+          padding: 8px 16px 8px 16px;
           line-height: 1.2;
+          outline: none;
+        }
+
+        .menu {
+          position: sticky;
+          background-color: white;
+          top: 0;
+          z-index: 10;
+        }
+
+        .menu button:focus {
           outline: none;
         }
 
@@ -471,21 +531,31 @@ const Editor = (props: any) => {
           margin-bottom: 0.8em;
         }
 
-        .ProseMirror img {
-          width: 100%;
-        }
-
         .ProseMirror a {
           color: rgb(245, 92, 137);
           text-decoration: underline;
         }
       `}</style>
-      <div className="font-bold text-gray-600 text-sm">{props.label}</div>
-      <div className="rounded-md border border-gray-400 py-2 px-4 w-full">
-        <div ref={viewHost} />
-      </div>
+      <RemirrorProvider
+        manager={manager}
+        value={value}
+        onChange={(parameter: any) => {
+          handleChange(name, parameter.state);
+        }}
+      >
+        <div className="rounded-md border border-gray-400">
+          <Menu />
+          <Editor />
+        </div>
+      </RemirrorProvider>
     </>
   );
 };
 
-export default Editor;
+const Editor = (): JSX.Element => {
+  const { getRootProps } = useRemirror();
+
+  return <div {...getRootProps()} />;
+};
+
+export default RemirrorWrapper;

@@ -1,6 +1,7 @@
 const InputString = ({
   value,
-  handleChange,
+  handleChange = () => {},
+  onChange = null,
   label,
   name,
   type = 'text',
@@ -12,16 +13,25 @@ const InputString = ({
       <input
         className="rounded-md border border-gray-400 py-2 px-4 w-full"
         value={value}
-        onChange={(e: any) =>
-          handleChange(
-            name,
-            type === 'number'
-              ? e.target.value === ''
-                ? 0
-                : parseInt(e.target.value)
-              : e.target.value
-          )
-        }
+        onChange={(e: any) => {
+          if (onChange === null) {
+            handleChange(
+              name,
+              type === 'number'
+                ? e.target.value === ''
+                  ? 0
+                  : parseInt(e.target.value)
+                : e.target.value
+            );
+          } else {
+            onChange(e);
+          }
+        }}
+        onKeyPress={(e: any) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+          }
+        }}
         placeholder={label}
         name={name}
         type={type}

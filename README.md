@@ -13,10 +13,7 @@ Touch next.config.js and add env variables.
 # Roadmap
 
 - [x] Product Category CRUD
-- [ ] Product Create
-- [ ] Product Read
-- [ ] Product Update
-- [ ] Product Delete
+- [x] Product CRUD
 - [ ] Product CreatedAt
 - [ ] Product Stock
 - [ ] User Create
@@ -25,7 +22,7 @@ Touch next.config.js and add env variables.
 - [ ] User Delete
 - [ ] User Authentication
 - [ ] Order Read
-- [ ] Iamport Integration
+- [ ] I'mport Integration
 - [ ] Magazine Create
 - [ ] Magazine Read
 - [ ] Magazine Update

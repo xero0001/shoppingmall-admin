@@ -11,21 +11,22 @@ import { ImageExtension } from 'remirror/extension/image';
 import { useManager } from 'remirror/react';
 import { CorePreset } from 'remirror/preset/core';
 
-import Layout from '../../../components/Layout';
-import FlatBigButton from '../../../components/Button/FlatBigButton';
-import InputString from '../../../components/Input/InputString';
-import InputSwitch from '../../../components/Input/InputSwitch';
-import InputCheckBox from '../../../components/Input/InputCheckBox';
-import InputImage from '../../../components/Input/InputImage';
-import Loader from '../../../components/Loader';
+import Layout from '../../../../components/Layout';
+import FlatBigButton from '../../../../components/Button/FlatBigButton';
+import InputString from '../../../../components/Input/InputString';
+import InputSwitch from '../../../../components/Input/InputSwitch';
+import InputCheckBox from '../../../../components/Input/InputCheckBox';
+import InputImage from '../../../../components/Input/InputImage';
+import Loader from '../../../../components/Loader';
 // import TextEditor from '../../../components/Input/TextEditor';
-import RemirrorEditor from '../../../components/Input/RemirrorEditor';
+import RemirrorEditor from '../../../../components/Input/RemirrorEditor';
 
-import { PRODUCTS_QUERY, productsQueryVars } from '../index';
-import { PRODUCT_CATEGORIES_QUERY } from '../categories/index';
+import { PRODUCTS_QUERY, productsQueryVars, PRODUCT_QUERY } from '../../index';
+import { PRODUCT_CATEGORIES_QUERY } from '../../categories/index';
 
-export const CREATE_ONE_PRODUCT_MUTATION = gql`
-  mutation createOneProduct(
+export const UPDATE_ONE_PRODUCT_MUTATION = gql`
+  mutation updateOneProduct(
+    $where: IdCustomWhere!
     $title: String!
     $price: Int!
     $published: Boolean!
@@ -36,7 +37,8 @@ export const CREATE_ONE_PRODUCT_MUTATION = gql`
     $categories: [Int]!
     $items: [Json]!
   ) {
-    createOneProduct(
+    updateOneProduct(
+      where: $where
       title: $title
       price: $price
       published: $published
@@ -47,6 +49,15 @@ export const CREATE_ONE_PRODUCT_MUTATION = gql`
       categories: $categories
       items: $items
     ) {
+      id
+      title
+    }
+  }
+`;
+
+export const DELETE_ONE_PRODUCT_MUTATION = gql`
+  mutation deleteOneProduct($where: IdCustomWhere!) {
+    deleteOneProduct(where: $where) {
       id
       title
     }
@@ -347,7 +358,7 @@ const InputProducts = ({ value, handleChange, name, label }: any) => {
   );
 };
 
-const ProductForm = ({ router }: any) => {
+const ProductForm = ({ router, constructor, args }: any) => {
   const extensionTemplate = () => [
     new CorePreset({}),
     new BoldExtension(),
@@ -359,16 +370,18 @@ const ProductForm = ({ router }: any) => {
   const manager = useManager(extensionTemplate);
 
   const [state, setState] = useState({
-    title: '',
-    price: 0,
-    published: false,
-    recommended: false,
-    soldOut: false,
-    thumbnail: '',
-    categories: [],
-    items: [],
+    title: constructor.title,
+    price: constructor.price,
+    published: constructor.published,
+    recommended: constructor.recommended,
+    soldOut: constructor.soldOut,
+    thumbnail: constructor.thumbnail,
+    categories: constructor.category.map((category: any) => {
+      return category.id;
+    }),
+    items: [...constructor.items.list],
     content: manager.createState({
-      content: '<p></p>',
+      content: constructor.content,
       stringHandler: fromHtml,
     }),
   });
@@ -381,13 +394,22 @@ const ProductForm = ({ router }: any) => {
     variables: queryVars,
   });
 
-  const [createOneProductMutation, { error }] = useMutation(
-    CREATE_ONE_PRODUCT_MUTATION,
+  const [updateOneProductMutation, { error }] = useMutation(
+    UPDATE_ONE_PRODUCT_MUTATION,
     {
       errorPolicy: 'all',
-      refetchQueries: [{ query: PRODUCTS_QUERY, variables: productsQueryVars }],
+      refetchQueries: [
+        { query: PRODUCTS_QUERY, variables: productsQueryVars },
+        { query: PRODUCT_QUERY, variables: args },
+      ],
     }
   );
+
+  const [deleteOneProductMutation] = useMutation(DELETE_ONE_PRODUCT_MUTATION, {
+    variables: args,
+    errorPolicy: 'all',
+    refetchQueries: [{ query: PRODUCTS_QUERY, variables: productsQueryVars }],
+  });
 
   interface ComponentState {
     title: string;
@@ -418,6 +440,14 @@ const ProductForm = ({ router }: any) => {
 
   const { productCategories } = query.data;
 
+  const handleDelete = () => {
+    deleteOneProductMutation({
+      update: (_, __) => {
+        router.push('/products');
+      },
+    });
+  };
+
   const handleSubmit = () => {
     let html = '<p></p>';
 
@@ -425,8 +455,9 @@ const ProductForm = ({ router }: any) => {
       html = toHtml({ node: state.content.doc, schema: state.content.schema });
     }
 
-    createOneProductMutation({
+    updateOneProductMutation({
       variables: {
+        ...args,
         ...state,
         content: html,
       },
@@ -444,11 +475,14 @@ const ProductForm = ({ router }: any) => {
       }}
     >
       <div className="flex flex-row justify-end items-center">
+        <div className="mr-auto">
+          <FlatBigButton label="삭제" colored={true} onClick={handleDelete} />
+        </div>
         <div>
           <FlatBigButton label="취소" colored={false} href="/products" />
         </div>
         <div className="ml-2">
-          <FlatBigButton label="생성" colored={true} type="submit" />
+          <FlatBigButton label="수정" colored={true} type="submit" />
         </div>
       </div>
       {error &&
@@ -551,11 +585,47 @@ const ProductForm = ({ router }: any) => {
   );
 };
 
+const QueryWrap = ({ args, router }: any) => {
+  const queryVars = args;
+
+  const query = useQuery(PRODUCT_QUERY, {
+    variables: queryVars,
+    errorPolicy: 'all',
+  });
+
+  if (Object.keys(router.query).length === 0) {
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (query.error) return <aside>데이터 로딩에 문제가 발생하였습니다.</aside>;
+  if (query.loading)
+    return (
+      <div className="w-full block">
+        <Loader />
+      </div>
+    );
+
+  const { product } = query.data;
+
+  return <ProductForm router={router} constructor={product} args={args} />;
+};
+
 const IndexPage = () => {
   const router = useRouter();
+  const { id } = router.query;
+
+  const args = {
+    where: {
+      id: parseInt(id as string),
+    },
+  };
 
   return (
-    <Layout title="상품 - 추가하기">
+    <Layout title="상품 - 수정하기">
       <div className="px-4 py-8">
         <div className="w-full items-center mb-4">
           <Link href="/products">
@@ -566,10 +636,10 @@ const IndexPage = () => {
             </a>
           </Link>
           <div className="text-2xl font-bold flex flex-row">
-            <span>상품 {'>'} 추가하기</span>
+            <span>상품 {'>'} 수정하기</span>
           </div>
         </div>
-        <ProductForm router={router} />
+        <QueryWrap args={args} router={router} />
       </div>
     </Layout>
   );

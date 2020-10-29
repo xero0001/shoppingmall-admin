@@ -64,7 +64,7 @@ const CategoriesList = () => {
   const { productCategories } = data;
 
   if (productCategories.length == 0)
-    return <div>상품이 존재하지 않습니다.</div>;
+    return <div>카테고리가 존재하지 않습니다.</div>;
 
   return (
     <>

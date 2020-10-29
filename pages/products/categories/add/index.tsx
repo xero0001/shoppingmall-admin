@@ -343,7 +343,7 @@ const IndexPage = () => {
   const router = useRouter();
 
   return (
-    <Layout title="상품 - 카테고리">
+    <Layout title="상품 - 카테고리 - 추가하기">
       <div className="px-4 py-8">
         <div className="w-full items-center mb-4">
           <Link href="/products/categories">
