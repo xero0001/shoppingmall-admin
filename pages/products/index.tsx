@@ -29,8 +29,8 @@ export const PRODUCT_QUERY = gql`
 export const PRODUCTS_QUERY = gql`
   query products(
     $where: ProductWhereInput
-    $skip: Int!
-    $take: Int!
+    $skip: Int
+    $take: Int
     $orderBy: [ProductOrderByInput!]
   ) {
     products(where: $where, skip: $skip, take: $take, orderBy: $orderBy) {
@@ -50,8 +50,8 @@ export const PRODUCTS_QUERY = gql`
 `;
 
 export const PRODUCTS_COUNT_QUERY = gql`
-  query productsCount($categoryId: Int!, $searchString: String!) {
-    productsCount(categoryId: $categoryId, searchString: $searchString)
+  query productsCount($where: ProductWhereInput) {
+    productsCount(where: $where)
   }
 `;
 
@@ -410,11 +410,32 @@ const IndexPage = () => {
     },
   });
 
+  const countQueryVariables =
+    value.categoryId === -1
+      ? {
+          where: {
+            title: {
+              contains: value.searchString,
+            },
+          },
+        }
+      : {
+          where: {
+            category: {
+              some: {
+                id: {
+                  equals: value.categoryId === -1 ? null : value.categoryId,
+                },
+              },
+            },
+            title: {
+              contains: value.searchString,
+            },
+          },
+        };
+
   const { loading, data } = useQuery(PRODUCTS_COUNT_QUERY, {
-    variables: {
-      categoryId: value.categoryId,
-      searchString: value.searchString,
-    },
+    variables: countQueryVariables,
     fetchPolicy: 'network-only',
   });
 
