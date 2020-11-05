@@ -6,6 +6,7 @@ const InputString = ({
   name,
   type = 'text',
   required = false,
+  disabled = false,
 }: any) => {
   return (
     <>
@@ -36,6 +37,7 @@ const InputString = ({
         name={name}
         type={type}
         required={required}
+        disabled={disabled}
       />
     </>
   );

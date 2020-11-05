@@ -2,29 +2,26 @@ import { useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
-import FlatBigButton from '../../components/Button/FlatBigButton';
+// import FlatBigButton from '../../components/Button/FlatBigButton';
 import Loader from '../../components/Loader';
-import { initializeApollo } from '../../lib/apolloClient';
+// import { initializeApollo } from '../../lib/apolloClient';
 // import { PRODUCT_CATEGORIES_QUERY } from './categories';
 
-// export const ORDERS_QUERY = gql`
-//   query orders($where: IdCustomWhere!) {
-//     product(where: $where) {
-//       id
-//       title
-//       price
-//       published
-//       recommended
-//       soldOut
-//       thumbnail
-//       items
-//       content
-//       category {
-//         id
-//       }
-//     }
-//   }
-// `;
+export const ORDER_QUERY = gql`
+  query order($where: OrderWhereUniqueInput!) {
+    order(where: $where) {
+      id
+      createdAt
+      amount
+      title
+      status
+      type
+      buyerName
+      buyerEmail
+      data
+    }
+  }
+`;
 
 export const ORDERS_QUERY = gql`
   query orders(
@@ -38,20 +35,10 @@ export const ORDERS_QUERY = gql`
       createdAt
       amount
       title
+      status
+      type
       buyerName
       buyerEmail
-
-      # createdAt
-      # buyerName
-      # buyerEmail
-      # amount
-      # title
-      # price
-      # status
-      # data
-      # type
-      # userId
-      # user
     }
   }
 `;
@@ -71,9 +58,9 @@ const Status = ({ statusList, value, setValue }: any) => {
       {value.statusId !== 'all' &&
         statusList.map((status: any) => {
           if (status.id === value.statusId) {
-            return <span>{status.name}</span>;
+            return <span key={status.name}>{status.name}</span>;
           } else {
-            return <></>;
+            return;
           }
         })}
       <span
@@ -90,7 +77,7 @@ const Status = ({ statusList, value, setValue }: any) => {
           xmlns="http://www.w3.org/2000/svg"
           width="20"
           height="20"
-          transform={`${show && 'rotate(180)'}`}
+          transform={`${show === true ? 'rotate(180)' : 'rotate(0)'}`}
           viewBox="0 0 24 24"
         >
           <path d="M0 7.33l2.829-2.83 9.175 9.339 9.167-9.339 2.829 2.83-11.996 12.17z" />
@@ -219,9 +206,20 @@ const Pagination = ({ count, value, setValue }: any) => {
 };
 
 const OrdersList = ({ queryVars }: any) => {
+  const status =
+    queryVars.statusId == 'all'
+      ? {}
+      : {
+          equals: queryVars.statusId,
+        };
+
   const queryVariables = {
-    where: null,
-    // orderBy: [{ createdAt: 'desc' }],
+    where: {
+      status,
+    },
+    take: queryVars.take,
+    skip: queryVars.skip,
+    orderBy: queryVars.orderBy,
   };
 
   // console.log(queryVariables);
@@ -230,8 +228,6 @@ const OrdersList = ({ queryVars }: any) => {
     variables: queryVariables,
     fetchPolicy: 'network-only',
   });
-
-  console.log(data);
 
   if (error)
     return (
@@ -258,16 +254,21 @@ const OrdersList = ({ queryVars }: any) => {
           <li key={order.id}>
             <div className="flex h-16 items-center justify-center border-b border-gray-400">
               <span style={{ flex: 3 }}>
-                <Link href={'/products/edit/' + order.id}>
+                <Link href={'/orders/edit/' + order.id}>
                   <a>{order.title}</a>
                 </Link>
               </span>
               <span style={{ flex: 1 }}>{order.amount}</span>
-              <span style={{ flex: 1 }}>{order.type}</span>
+              <span style={{ flex: 1 }}>
+                {order.status === 'pending' && '결제전'}
+                {order.status === 'success' && '결제완료'}
+                {order.status === 'cancelled' && '결제취소'}
+              </span>
+              <span style={{ flex: 1 }}>
+                {order.type === 'nonmember' && '비회원'}
+                {order.type === 'member' && '회원'}
+              </span>
               <span style={{ flex: 1 }}>{order.buyerName}</span>
-              {/* <span style={{ flex: 1 }}>{order.published && '공개'}</span>
-              <span style={{ flex: 1 }}>{order.recommended && '추천'}</span>
-              <span style={{ flex: 1 }}>{order.soldOut && '품절'}</span> */}
             </div>
           </li>
         );
@@ -345,6 +346,9 @@ const IndexPage = () => {
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
                   금액
+                </span>
+                <span style={{ flex: 1 }} className="text-gray-500">
+                  상태
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
                   구분
