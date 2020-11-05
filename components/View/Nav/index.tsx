@@ -24,7 +24,7 @@ const Nav = () => {
         </div>
         <div className="px-4 py-1">
           <NavButton label="홈" href="/" />
-          <NavButton label="주문" href="/" />
+          <NavButton label="주문" href="/orders" />
           <NavButton label="상품" href="/products" />
           <NavButton label="고객" href="/" />
           <NavButton label="매거진" href="/" />
