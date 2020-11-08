@@ -19,6 +19,7 @@ export const ORDER_QUERY = gql`
       buyerName
       buyerEmail
       data
+      tracking
     }
   }
 `;
@@ -39,6 +40,7 @@ export const ORDERS_QUERY = gql`
       type
       buyerName
       buyerEmail
+      tracking
     }
   }
 `;
@@ -263,12 +265,23 @@ const OrdersList = ({ queryVars }: any) => {
                 {order.status === 'pending' && '결제전'}
                 {order.status === 'success' && '결제완료'}
                 {order.status === 'cancelled' && '결제취소'}
+                {order.status === 'delivery' && (
+                  <>
+                    <span className="text-sm block">배송처리</span>
+                    <span className="text-xs block">{order.tracking}</span>
+                  </>
+                )}
               </span>
               <span style={{ flex: 1 }}>
                 {order.type === 'nonmember' && '비회원'}
                 {order.type === 'member' && '회원'}
               </span>
               <span style={{ flex: 1 }}>{order.buyerName}</span>
+              <span style={{ flex: 1 }} className="text-sm">
+                {order.createdAt.substr(0, 10) +
+                  ' ' +
+                  order.createdAt.substr(11, 5)}
+              </span>
             </div>
           </li>
         );
@@ -355,6 +368,9 @@ const IndexPage = () => {
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
                   주문자
+                </span>
+                <span style={{ flex: 1 }} className="text-gray-500">
+                  주문일자
                 </span>
               </div>
             </li>

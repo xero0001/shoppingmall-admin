@@ -1,7 +1,7 @@
-import { useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from '@apollo/client';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-// import { useState } from 'react';
+import { useState } from 'react';
 
 import Layout from '../../../../components/Layout';
 import FlatBigButton from '../../../../components/Button/FlatBigButton';
@@ -14,45 +14,16 @@ import { ORDER_QUERY } from '../../';
 import { PRODUCTS_QUERY } from '../../../products';
 // import { PRODUCT_CATEGORIES_QUERY } from '../../categories/index';
 
-// export const UPDATE_ONE_ORDER_MUTATION = gql`
-//   mutation updateOneProduct(
-//     $where: IdCustomWhere!
-//     $title: String!
-//     $price: Int!
-//     $published: Boolean!
-//     $recommended: Boolean!
-//     $soldOut: Boolean!
-//     $thumbnail: String!
-//     $content: String!
-//     $categories: [Int]!
-//     $items: [Json]!
-//   ) {
-//     updateOneProduct(
-//       where: $where
-//       title: $title
-//       price: $price
-//       published: $published
-//       recommended: $recommended
-//       soldOut: $soldOut
-//       thumbnail: $thumbnail
-//       content: $content
-//       categories: $categories
-//       items: $items
-//     ) {
-//       id
-//       title
-//     }
-//   }
-// `;
-
-// export const DELETE_ONE_ORDER_MUTATION = gql`
-//   mutation deleteOneProduct($where: IdCustomWhere!) {
-//     deleteOneProduct(where: $where) {
-//       id
-//       title
-//     }
-//   }
-// `;
+export const UPDATE_ONE_ORDER_MUTATION = gql`
+  mutation updateOneOrder(
+    $where: OrderWhereUniqueInput!
+    $data: OrderUpdateInput!
+  ) {
+    updateOneOrder(where: $where, data: $data) {
+      id
+    }
+  }
+`;
 
 export const numberWithCommas = (x: number) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -152,60 +123,43 @@ const ProductSingleItem = ({ cartProduct, products }: any) => {
   );
 };
 
-const ProductForm = ({ constructor }: any) => {
-  // const [state, setState] = useState({
-  //   title: constructor.title,
-  //   // amount: constructor.amount,
-  // });
+const ProductForm = ({ router, constructor, queryVars }: any) => {
+  const [state, setState] = useState({
+    tracking: constructor.tracking,
+    // amount: constructor.amount,
+  });
 
-  // const [updateOneProductMutation, { error }] = useMutation(
-  //   UPDATE_ONE_PRODUCT_MUTATION,
-  //   {
-  //     errorPolicy: 'all',
-  //     refetchQueries: [
-  //       { query: ORDERS_QUERY, variables: productsQueryVars },
-  //       { query: ORDER_QUERY, variables: args },
-  //     ],
-  //   }
-  // );
+  const [updateOneOrderMutation] = useMutation(UPDATE_ONE_ORDER_MUTATION, {
+    errorPolicy: 'all',
+    refetchQueries: [{ query: ORDER_QUERY, variables: queryVars }],
+  });
 
-  // const [deleteOneProductMutation] = useMutation(DELETE_ONE_PRODUCT_MUTATION, {
-  //   variables: args,
-  //   errorPolicy: 'all',
-  //   refetchQueries: [{ query: PRODUCTS_QUERY, variables: productsQueryVars }],
-  // });
+  interface ComponentState {
+    tracking: string;
+  }
 
-  // interface ComponentState {
-  //   title: string;
-  //   // amount: number;
-  // }
-
-  // const handleChange = (name: string, value: any) => {
-  //   setState({
-  //     ...state,
-  //     [name]: value,
-  //   } as ComponentState);
-  // };
-
-  // const handleDelete = () => {
-  //   deleteOneProductMutation({
-  //     update: (_, __) => {
-  //       router.push('/products');
-  //     },
-  //   });
-  // };
+  const handleChange = (e: any) => {
+    setState({
+      ...state,
+      [e.target.name]: e.target.value,
+    } as ComponentState);
+  };
 
   const handleSubmit = () => {
-    // updateOneProductMutation({
-    //   variables: {
-    //     ...args,
-    //     ...state,
-    //     content: html,
-    //   },
-    //   update: (_, __) => {
-    //     router.push('/products');
-    //   },
-    // });
+    updateOneOrderMutation({
+      variables: {
+        where: {
+          id: constructor.id,
+        },
+        data: {
+          tracking: { set: state.tracking },
+          status: { set: 'delivery' },
+        },
+      },
+      update: (_, __) => {
+        router.push('/orders');
+      },
+    });
   };
 
   const status =
@@ -215,6 +169,8 @@ const ProductForm = ({ constructor }: any) => {
       ? '결제완료'
       : constructor.status === 'cancelled'
       ? '결제취소'
+      : constructor.status === 'delivery'
+      ? '배송처리'
       : '';
 
   const type = constructor.type === 'nonmember' ? '비회원' : '회원';
@@ -257,12 +213,20 @@ const ProductForm = ({ constructor }: any) => {
           <FlatBigButton label="취소" colored={false} href="/orders" />
         </div>
         <div className="ml-2">
-          <FlatBigButton label="수정" colored={true} type="submit" />
+          <FlatBigButton label="배송처리" colored={true} type="submit" />
         </div>
       </div>
       <div className="py-4 mt-4">
         <div className="max-w-4xl mx-auto block">
           <div className="block">
+            <InputString
+              label="배송추적"
+              value={state.tracking}
+              name="tracking"
+              onChange={handleChange}
+            />
+          </div>
+          <div className="block mt-4">
             <InputString
               label="주문 이름"
               value={constructor.title}
@@ -377,7 +341,7 @@ const ProductForm = ({ constructor }: any) => {
 };
 
 // const QueryWrap = ({ args, router }: any) => {
-const QueryWrap = ({ args }: any) => {
+const QueryWrap = ({ router, args }: any) => {
   const queryVars = args;
 
   const query = useQuery(ORDER_QUERY, {
@@ -395,7 +359,9 @@ const QueryWrap = ({ args }: any) => {
 
   const { order } = query.data;
 
-  return <ProductForm constructor={order} />;
+  return (
+    <ProductForm router={router} constructor={order} queryVars={queryVars} />
+  );
 };
 
 const IndexPage = ({ id }: any) => {
@@ -423,7 +389,7 @@ const IndexPage = ({ id }: any) => {
           </div>
         </div>
         {/* <QueryWrap args={args} router={router} /> */}
-        <QueryWrap args={args} />
+        <QueryWrap router={router} args={args} />
       </div>
     </Layout>
   );
