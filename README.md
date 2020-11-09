@@ -12,20 +12,12 @@ Touch next.config.js and add env variables.
 
 # Roadmap
 
-- [x] Product Category CRUD
-- [x] Product CRUD
+- [x] Product Category
+- [x] Product
+- [x] Notice / Contact / Banner
+- [x] Order
+- [ ] User
+- [ ] Magazine
 - [ ] Product CreatedAt
-- [ ] Product Stock
-- [ ] User Create
-- [ ] User Read
-- [ ] User Update
-- [ ] User Delete
-- [ ] User Authentication
-- [ ] Order Read
-- [ ] I'mport Integration
-- [ ] Magazine Create
-- [ ] Magazine Read
-- [ ] Magazine Update
-- [ ] Magazine Delete
 
 <!-- https://discuss.prosemirror.net/t/lightweight-react-integration-example/2680 -->

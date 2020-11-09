@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Loader from '../../Loader';
 
 type Props = {
   label?: any;
@@ -9,6 +10,7 @@ type Props = {
   disabled?: Boolean;
   size?: string;
   type?: any;
+  loading?: Boolean;
 };
 
 const NavButton = ({
@@ -19,6 +21,7 @@ const NavButton = ({
   disabled = false,
   size = 'long',
   type = 'button',
+  loading = false,
 }: Props) => {
   if (disabled) {
     return (
@@ -33,7 +36,10 @@ const NavButton = ({
             ${size === 'full' && 'w-full'}
           `}
       >
-        <span>{label}</span>
+        <span>
+          {!loading && label}
+          {loading && <Loader />}
+        </span>
       </div>
     );
   } else if (href) {
@@ -51,7 +57,10 @@ const NavButton = ({
           `}
           type={type}
         >
-          <span>{label}</span>
+          <span>
+            {!loading && label}
+            {loading && <Loader small={true} />}
+          </span>
         </a>
       </Link>
     );
@@ -72,7 +81,10 @@ const NavButton = ({
         `}
         type={type}
       >
-        <span>{label}</span>
+        <span>
+          {!loading && label}
+          {loading && <Loader small={true} />}
+        </span>
       </button>
     );
   }

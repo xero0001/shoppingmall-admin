@@ -1,16 +1,12 @@
-const Loader = () => {
+const Loader = ({ small = false }: any) => {
   return (
     <>
       <style jsx>{`
         .loader {
-          margin: 0 0 2em;
           margin-left: auto;
           margin-right: auto;
-          height: 100px;
           width: 100%;
           text-align: center;
-          padding: 1em;
-          margin: 0 auto 1em;
           display: inline-block;
           vertical-align: top;
         }
@@ -28,8 +24,8 @@ const Loader = () => {
           id="loader-1"
           x="0px"
           y="0px"
-          width="40px"
-          height="40px"
+          width={small ? '24px' : '40px'}
+          height={small ? '24px' : '40px'}
           viewBox="0 0 40 40"
           enableBackground="new 0 0 40 40"
         >
