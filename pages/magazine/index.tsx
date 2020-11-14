@@ -18,6 +18,8 @@ export const POST_QUERY = gql`
       thumbnail
       content
 
+      related
+
       categoryId
     }
   }
