@@ -30,7 +30,7 @@ const InputImage = ({
       file.name;
 
     const albumBucketName = process.env.AWS_S3_BUCKET_NAME;
-    const bucketRegion = process.env.AWS_REGION;
+    const bucketRegion = process.env.AWS_REGION_STRING;
     const IdentityPoolId = process.env.AWS_IDPOOL_ID;
 
     AWS.config.update({
