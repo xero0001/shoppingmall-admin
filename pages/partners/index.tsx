@@ -1,6 +1,6 @@
 import { gql, useQuery, useMutation } from '@apollo/client';
 // import Link from 'next/link';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 import Layout from '../../components/Layout';
@@ -160,7 +160,7 @@ const InputPartners = ({ value, handleChange, name, label }: any) => {
   );
 };
 
-const MetaForm = ({ router, constructor, queryVars, title, action }: any) => {
+const MetaForm = ({ constructor, queryVars }: any) => {
   const [state, setState] = useState({
     jsonData: {
       list: constructor.jsonData.list.map((item: any) => ({
@@ -353,7 +353,7 @@ const MetaForm = ({ router, constructor, queryVars, title, action }: any) => {
   );
 };
 
-const QueryWrap = ({ router, args, title, action }: any) => {
+const QueryWrap = ({ args }: any) => {
   const queryVars = args;
 
   const query = useQuery(META, {
@@ -371,20 +371,10 @@ const QueryWrap = ({ router, args, title, action }: any) => {
 
   const { meta } = query.data;
 
-  return (
-    <MetaForm
-      router={router}
-      constructor={meta}
-      queryVars={queryVars}
-      title={title}
-      action={action}
-    />
-  );
+  return <MetaForm constructor={meta} queryVars={queryVars} />;
 };
 
 const IndexPage = () => {
-  const router = useRouter();
-
   const args = {
     where: {
       id: 'partners',
@@ -402,7 +392,7 @@ const IndexPage = () => {
             <span>{title + ' > ' + action}</span>
           </div>
         </div>
-        <QueryWrap router={router} args={args} title={title} action={action} />
+        <QueryWrap args={args} />
       </div>
     </Layout>
   );
