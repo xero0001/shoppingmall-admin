@@ -29,6 +29,8 @@ const Nav = () => {
           <NavButton label="고객" href="/users" />
           <NavButton label="매거진" href="/magazine" />
           <hr className="mt-1" />
+          <NavButton label="메인상품배너" href="/mainproducts" />
+          <NavButton label="파트너스" href="/partners" />
           <NavButton label="공지사항" href="/notices" />
           <NavButton label="문의" href="/contacts" />
           <NavButton label="배너" href="/banners" />
