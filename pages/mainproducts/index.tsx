@@ -1,5 +1,5 @@
 import { gql, useQuery, useMutation } from '@apollo/client';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
@@ -34,104 +34,6 @@ export const UPDATE_ONE_META = gql`
     }
   }
 `;
-
-export const numberWithCommas = (x: number) => {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
-
-const ProductOptionItems = ({ cartProduct, products }: any) => {
-  const product = products.find((product: any) => {
-    return product.id === cartProduct.id;
-  });
-
-  return cartProduct.items.map((optionItem: any) => {
-    return (
-      <ul
-        key={optionItem.idx}
-        className="flex flex-row py-8 border-b border-gray-200"
-      >
-        <li className="flex flex-row items-center" style={{ flex: 3 }}>
-          <Link href={'/products/edit/' + product.id}>
-            <a>
-              <div
-                className="w-32 h-32 bg-center bg-cover"
-                style={{
-                  backgroundImage:
-                    'url(' + product.items.list[optionItem.idx].image + ')',
-                }}
-              />
-            </a>
-          </Link>
-          <div>
-            <Link href={'/products/edit/' + product.id}>
-              <a>{product.title}</a>
-            </Link>
-            <div className="block text-gray-600 text-xs">
-              {product.items.list[optionItem.idx].name}
-            </div>
-          </div>
-        </li>
-        <li className="flex flex-row items-center" style={{ flex: 1 }}>
-          {numberWithCommas(
-            product.price + product.items.list[optionItem.idx].price
-          ) + '원'}
-        </li>
-        <li className="flex flex-row items-center" style={{ flex: 2 }}>
-          {optionItem.quantity}
-        </li>
-        <li
-          className="flex flex-row items-center justify-between"
-          style={{ flex: 1 }}
-        >
-          <span>
-            {numberWithCommas(
-              (product.price + product.items.list[optionItem.idx].price) *
-                optionItem.quantity
-            ) + '원'}
-          </span>
-        </li>
-      </ul>
-    );
-  });
-};
-
-const ProductSingleItem = ({ cartProduct, products }: any) => {
-  const product = products.find((product: any) => {
-    return product.id === cartProduct.id;
-  });
-
-  return (
-    <ul className="flex flex-row py-8 border-b border-gray-200">
-      <li className="flex flex-row items-center" style={{ flex: 3 }}>
-        <Link href={'/products/edit/' + product.id}>
-          <a>
-            <div
-              className="w-32 h-32 bg-center bg-cover"
-              style={{ backgroundImage: 'url(' + product.thumbnail + ')' }}
-            />
-          </a>
-        </Link>
-        <Link href={'/products/edit/' + product.id}>
-          <a>{product.title}</a>
-        </Link>
-      </li>
-      <li className="flex flex-row items-center" style={{ flex: 1 }}>
-        {numberWithCommas(product.price) + '원'}
-      </li>
-      <li className="flex flex-row items-center" style={{ flex: 2 }}>
-        {cartProduct.quantity}
-      </li>
-      <li
-        className="flex flex-row items-center justify-between"
-        style={{ flex: 1 }}
-      >
-        <span>
-          {numberWithCommas(product.price * cartProduct.quantity) + '원'}
-        </span>
-      </li>
-    </ul>
-  );
-};
 
 const InputPartners = ({ value, handleChange, name, label }: any) => {
   return (
