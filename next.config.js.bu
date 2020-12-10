@@ -1,9 +1,0 @@
-module.exports = {
-  env: {
-    API_URL: 'https://shoppingmall-api.vercel.app/api/graphql',
-    SHOP_URL: "https://shoppingmall.co.kr",
-    AWS_REGION:"ap-northeast-2",
-    AWS_IDPOOL_ID:"ap-northeast-2:4debab61-2098-4d1c-bfeb-969f26f800b1",
-    AWS_S3_BUCKET_NAME:'cdn-sleekhands'
-  },
-}

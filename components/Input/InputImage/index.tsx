@@ -29,9 +29,9 @@ const InputImage = ({
       today.getSeconds().toString() +
       file.name;
 
-    const albumBucketName = process.env.AWS_S3_BUCKET_NAME;
-    const bucketRegion = process.env.AWS_REGION_STRING;
-    const IdentityPoolId = process.env.AWS_IDPOOL_ID;
+    const albumBucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME;
+    const bucketRegion = process.env.NEXT_PUBLIC_AWS_REGION_STRING;
+    const IdentityPoolId = process.env.NEXT_PUBLIC_AWS_IDPOOL_ID;
 
     AWS.config.update({
       region: bucketRegion,

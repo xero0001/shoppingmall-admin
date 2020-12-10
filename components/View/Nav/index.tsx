@@ -12,8 +12,8 @@ const Nav = () => {
         }
       `}</style>
       <nav className="nav overflow-y-auto h-screen py-4">
-        {process.env.SHOP_URL ? (
-          <Link href={process.env.SHOP_URL}>
+        {process.env.NEXT_PUBLIC_SHOP_URL ? (
+          <Link href={process.env.NEXT_PUBLIC_SHOP_URL}>
             <a className="px-4">내 상점 바로가기</a>
           </Link>
         ) : (

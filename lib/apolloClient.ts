@@ -10,7 +10,7 @@ function createApolloClient() {
     ssrMode: typeof window === 'undefined',
     link: new HttpLink({
       // uri: 'https://nextjs-graphql-with-prisma-simple.vercel.app/api', // Server URL (must be absolute)
-      uri: process.env.API_URL,
+      uri: process.env.NEXT_PUBLIC_API_URL,
       // uri: 'http://localhost:4000',
       credentials: 'same-origin', // Additional fetch() options like `credentials` or `headers`
       // credentials: 'include',
