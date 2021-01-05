@@ -7,7 +7,6 @@ import Layout from '../../components/Layout';
 import FlatBigButton from '../../components/Button/FlatBigButton';
 import InputString from '../../components/Input/InputString';
 import InputImage from '../../components/Input/InputImage';
-import InputCheckBox from '../../components/Input/InputCheckBox';
 
 import Loader from '../../components/Loader';
 
@@ -44,7 +43,7 @@ const InputMainproducts = ({ value, handleChange, name, label }: any) => {
           <li>
             <div className="py-4 border-t border-b-2 border-gray-400 flex flex-row items-center">
               <span style={{ flex: 3 }} className="text-gray-500 mr-4">
-                메인상품 이름
+                메인상품 링크
               </span>
               <span style={{ flex: 1 }} className="text-gray-500 mr-4">
                 메인상품 이미지
