@@ -10,6 +10,17 @@ export const REVIEW_QUERY = gql`
   query review($where: ReviewWhereUniqueInput!) {
     review(where: $where) {
       id
+      isBest
+      createdAt
+      content
+      rate
+      user {
+        name
+        username
+      }
+      product {
+        title
+      }
     }
   }
 `;
@@ -23,6 +34,17 @@ export const REVIEWS_QUERY = gql`
   ) {
     reviews(where: $where, skip: $skip, take: $take, orderBy: $orderBy) {
       id
+      isBest
+      createdAt
+      content
+      rate
+      user {
+        name
+        username
+      }
+      product {
+        title
+      }
     }
   }
 `;
@@ -38,95 +60,6 @@ export const reviewsQueryVars = {
   take: 10,
   where: null,
   orderBy: [{ createdAt: 'desc' }],
-};
-
-const SubCategory = ({ categories, parentId, depth, value, setValue }: any) => {
-  return (
-    <ul>
-      {categories.map((category: any) => {
-        if (category.parentId === parentId) {
-          return (
-            <li key={category.id}>
-              <span className="mx-4 my-2 flex jusity-start items-center flex-row">
-                {depth > 1 && (
-                  <span className={`pl-${((depth - 1) * 4).toString()}`} />
-                )}
-                {depth > 0 && (
-                  <span className="pr-1">
-                    <svg
-                      fill="white"
-                      width="8px"
-                      height="10px"
-                      viewBox="0 0 15 17"
-                      version="1.1"
-                    >
-                      <g
-                        id="Icons"
-                        stroke="none"
-                        strokeWidth="1"
-                        fill="none"
-                        fillRule="evenodd"
-                      >
-                        <g
-                          id="Rounded"
-                          transform="translate(-716.000000, -3436.000000)"
-                        >
-                          <g
-                            id="Navigation"
-                            transform="translate(100.000000, 3378.000000)"
-                          >
-                            <g
-                              id="-Round-/-Navigation-/-subdirectory_arrow_right"
-                              transform="translate(612.000000, 54.000000)"
-                            >
-                              <g transform="translate(0.000000, 0.000000)">
-                                <polygon
-                                  id="Path"
-                                  opacity="0.87"
-                                  points="24 24 0 24 0 0 24 0"
-                                />
-                                <path
-                                  d="M18.29,15.71 L13.71,20.29 C13.32,20.68 12.68,20.68 12.29,20.29 C11.9,19.9 11.9,19.26 12.29,18.87 L15.17,16 L5,16 C4.45,16 4,15.55 4,15 L4,5 C4,4.45 4.45,4 5,4 C5.55,4 6,4.45 6,5 L6,14 L15.17,14 L12.29,11.13 C11.9,10.74 11.9,10.1 12.29,9.71 C12.68,9.32 13.32,9.32 13.71,9.71 L18.29,14.29 C18.68,14.68 18.68,15.32 18.29,15.71 Z"
-                                  id="🔹-Icon-Color"
-                                  fill="black"
-                                />
-                              </g>
-                            </g>
-                          </g>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                )}
-                <span
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setValue({
-                      ...value,
-                      categoryId: parseInt(category.id),
-                    });
-                  }}
-                >
-                  {category.name}
-                </span>
-              </span>
-              {category.child.length > 0 && (
-                <SubCategory
-                  categories={categories}
-                  parentId={category.id}
-                  depth={depth + 1}
-                  value={value}
-                  setValue={setValue}
-                />
-              )}
-            </li>
-          );
-        } else {
-          <></>;
-        }
-      })}
-    </ul>
-  );
 };
 
 const Category = () => {
@@ -212,33 +145,24 @@ const Pagination = ({ count, value, setValue }: any) => {
   );
 };
 
-const ProductsList = ({ queryVars }: any) => {
-  const queryVariables =
-    queryVars.categoryId === -1
-      ? {
-          ...queryVars,
-          where: {
-            title: {
-              contains: queryVars.searchString,
-            },
-          },
-        }
-      : {
-          ...queryVars,
-          where: {
-            category: {
-              some: {
-                id: { equals: queryVars.categoryId },
-              },
-            },
-            title: {
-              contains: queryVars.searchString,
-            },
-          },
-        };
+const ReviewsList = ({ queryVars }: any) => {
+  const queryVariables = {
+    ...queryVars,
+    where: {
+      // category: {
+      //   some: {
+      //     id: { equals: queryVars.categoryId },
+      //   },
+      // },
+      title: {
+        contains: queryVars.searchString,
+      },
+    },
+  };
 
-  const { loading, error, data } = useQuery(PRODUCTS_QUERY, {
-    variables: queryVariables,
+  const { loading, error, data } = useQuery(REVIEWS_QUERY, {
+    // variables: queryVariables,
+    variables: {},
     fetchPolicy: 'network-only',
   });
 
@@ -250,38 +174,44 @@ const ProductsList = ({ queryVars }: any) => {
       </div>
     );
 
-  const { products } = data;
+  const { reviews } = data;
 
-  if (products.length == 0) return <div>상품이 존재하지 않습니다.</div>;
+  if (reviews.length == 0) return <div>상품이 존재하지 않습니다.</div>;
 
   return (
     <>
-      {products.map((product: any) => {
+      {reviews.map((review: any) => {
         return (
-          <li key={product.id}>
+          <li key={review.id}>
             <div className="flex h-16 items-center justify-center border-b border-gray-400">
-              <span style={{ flex: 3 }}>
-                <Link href={'/reviews/edit/' + product.id}>
-                  <a>{product.title}</a>
+              <span style={{ flex: 1 }}>
+                <Link href={'/reviews/edit/' + review.id}>
+                  <a>{review.createdAt.substr(0, 16)}</a>
                 </Link>
               </span>
-              <span style={{ flex: 1 }}>{product.price}</span>
-              <span
-                style={{
-                  flex: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-                className="text-xs"
-              >
-                {product.category.map((category: any) => {
-                  return <span className="mr-2">{category.name}</span>;
-                })}
+              <span style={{ flex: 1 }}>
+                <Link href={'/reviews/edit/' + review.id}>
+                  <a>{review.product.title}</a>
+                </Link>
               </span>
-              <span style={{ flex: 1 }}>{product.published && '공개'}</span>
-              <span style={{ flex: 1 }}>{product.recommended && '추천'}</span>
-              <span style={{ flex: 1 }}>{product.soldOut && '품절'}</span>
+              <span style={{ flex: 1 }}>
+                <Link href={'/reviews/edit/' + review.id}>
+                  <a>{review.user.name}</a>
+                </Link>
+              </span>
+              <span style={{ flex: 1 }}>
+                <Link href={'/reviews/edit/' + review.id}>
+                  <a>{review.content}</a>
+                </Link>
+              </span>
+              <span style={{ flex: 1 }}>
+                <Link href={'/reviews/edit/' + review.id}>
+                  <a>{review.rate}</a>
+                </Link>
+              </span>
+              <span style={{ flex: 1 }}>
+                {review.isBest ? '베스트 리뷰' : ''}
+              </span>
             </div>
           </li>
         );
@@ -296,49 +226,31 @@ const IndexPage = () => {
     take: 10,
     where: null,
     orderBy: [{ createdAt: 'desc' }],
-    searchInput: '',
+    // searchInput: '',
     page: 1,
-    categoryId: -1,
-    searchString: '',
+    // categoryId: -1,
+    // searchString: '',
   });
 
-  const productCategoriesQuery = useQuery(PRODUCT_CATEGORIES_QUERY, {
-    variables: {
-      where: null,
-      orderBy: [{ parentId: 'desc' }, { order: 'asc' }],
-    },
-  });
+  // const countQueryVariables = {
+  //   where: {
+  //     category: {
+  //       some: {
+  //         id: {
+  //           equals: value.categoryId === -1 ? null : value.categoryId,
+  //         },
+  //       },
+  //     },
+  //     title: {
+  //       contains: value.searchString,
+  //     },
+  //   },
+  // };
 
-  const countQueryVariables =
-    value.categoryId === -1
-      ? {
-          where: {
-            title: {
-              contains: value.searchString,
-            },
-          },
-        }
-      : {
-          where: {
-            category: {
-              some: {
-                id: {
-                  equals: value.categoryId === -1 ? null : value.categoryId,
-                },
-              },
-            },
-            title: {
-              contains: value.searchString,
-            },
-          },
-        };
-
-  const { loading, data } = useQuery(PRODUCTS_COUNT_QUERY, {
-    variables: countQueryVariables,
+  const { loading, data } = useQuery(REVIEWS_COUNT_QUERY, {
+    // variables:,
     fetchPolicy: 'network-only',
   });
-
-  const { productCategories } = productCategoriesQuery.data;
 
   // console.log(productCategories);
 
@@ -350,7 +262,7 @@ const IndexPage = () => {
         </div>
         <div className="flex flex-row justify-between items-center">
           <div className="flex items-center">
-            <div>
+            {/* <div>
               <input
                 className="border border-gray-400 p-2 text-sm round w-64"
                 placeholder="상품 이름"
@@ -369,7 +281,7 @@ const IndexPage = () => {
                   }
                 }}
               />
-            </div>
+            </div> */}
             {/* <div className="ml-2">
               <div
                 className="border border-gray-400 p-2 text-sm round flex flex-column
@@ -400,34 +312,34 @@ const IndexPage = () => {
                 className="py-4 border-t border-b-2 border-gray-400 flex flex-row
           items-center"
               >
-                <span style={{ flex: 3 }} className="text-gray-500">
-                  상품 이름
+                <span style={{ flex: 1 }} className="text-gray-500">
+                  날짜
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
-                  가격
+                  상품명
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
-                  카테고리
+                  작성자
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
-                  공개
+                  내용
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
-                  추천
+                  별점
                 </span>
                 <span style={{ flex: 1 }} className="text-gray-500">
-                  품절
+                  베스트 여부
                 </span>
               </div>
             </li>
-            <ProductsList
+            <ReviewsList
               queryVars={{
                 where: value.where,
                 skip: value.skip,
                 take: value.take,
                 orderBy: value.orderBy,
-                searchString: value.searchString,
-                categoryId: value.categoryId,
+                // searchString: value.searchString,
+                // categoryId: value.categoryId,
               }}
             />
           </ul>
@@ -435,7 +347,7 @@ const IndexPage = () => {
         {loading && <Loader />}
         {!loading && (
           <Pagination
-            count={data.productsCount}
+            count={data.reviewsCount}
             value={value}
             setValue={setValue}
           />
@@ -447,20 +359,20 @@ const IndexPage = () => {
 
 export default IndexPage;
 
-export async function getServerSideProps(_: any) {
-  const apolloClient = initializeApollo(null);
+// export async function getServerSideProps(_: any) {
+//   const apolloClient = initializeApollo(null);
 
-  await apolloClient.query({
-    query: PRODUCT_CATEGORIES_QUERY,
-    variables: {
-      where: null,
-      orderBy: [{ parentId: 'desc' }, { order: 'asc' }],
-    },
-  });
+//   await apolloClient.query({
+//     query: PRODUCT_CATEGORIES_QUERY,
+//     variables: {
+//       where: null,
+//       orderBy: [{ parentId: 'desc' }, { order: 'asc' }],
+//     },
+//   });
 
-  return {
-    props: {
-      initialApolloState: apolloClient.cache.extract(),
-    },
-  };
-}
+//   return {
+//     props: {
+//       initialApolloState: apolloClient.cache.extract(),
+//     },
+//   };
+// }
