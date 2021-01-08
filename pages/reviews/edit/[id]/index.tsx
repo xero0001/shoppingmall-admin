@@ -1,26 +1,26 @@
 import { gql, useQuery, useMutation } from '@apollo/client';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+// import { useState } from 'react';
 
-import { BoldExtension } from 'remirror/extension/bold';
-import { ItalicExtension } from 'remirror/extension/italic';
-import { UnderlineExtension } from 'remirror/extension/underline';
-import { fromHtml, toHtml } from 'remirror/core';
-import { ImageExtension } from 'remirror/extension/image';
-import { useManager } from 'remirror/react';
-import { CorePreset } from 'remirror/preset/core';
+// import { BoldExtension } from 'remirror/extension/bold';
+// import { ItalicExtension } from 'remirror/extension/italic';
+// import { UnderlineExtension } from 'remirror/extension/underline';
+// import { fromHtml, toHtml } from 'remirror/core';
+// import { ImageExtension } from 'remirror/extension/image';
+// import { useManager } from 'remirror/react';
+// import { CorePreset } from 'remirror/preset/core';
 
 import Layout from '../../../../components/Layout';
 import FlatBigButton from '../../../../components/Button/FlatBigButton';
 import InputString from '../../../../components/Input/InputString';
 import InputRate from '../../../../components/Input/InputRate';
-import InputSwitch from '../../../../components/Input/InputSwitch';
-import InputCheckBox from '../../../../components/Input/InputCheckBox';
-import InputImage from '../../../../components/Input/InputImage';
+// import InputSwitch from '../../../../components/Input/InputSwitch';
+// import InputCheckBox from '../../../../components/Input/InputCheckBox';
+// import InputImage from '../../../../components/Input/InputImage';
 import Loader from '../../../../components/Loader';
 // import TextEditor from '../../../components/Input/TextEditor';
-import RemirrorEditor from '../../../../components/Input/RemirrorEditor';
+// import RemirrorEditor from '../../../../components/Input/RemirrorEditor';
 
 import { REVIEWS_QUERY, REVIEW_QUERY } from '../../index';
 
@@ -153,183 +153,6 @@ const CategoryItems = ({
           return;
         }
       })}
-    </>
-  );
-};
-
-const CategoriesMultiple = ({
-  value,
-  handleChange,
-  name,
-  label,
-  categories,
-}: any) => {
-  return (
-    <>
-      <div className="font-bold text-gray-600 text-sm">{label}</div>
-      <div
-        className="block rounded-md border border-gray-400 overflow-hidden
-    overflow-y-scroll"
-        style={{ height: '320px' }}
-      >
-        <ul>
-          <CategoryItems
-            value={value}
-            categories={categories}
-            parentId={null}
-            depth={0}
-            name={name}
-            handleChange={handleChange}
-          />
-        </ul>
-      </div>
-    </>
-  );
-};
-
-const InputProducts = ({ value, handleChange, name, label }: any) => {
-  return (
-    <>
-      <div className="font-bold text-gray-600 text-sm">{label}</div>
-      <div className="block rounded-md">
-        <ul>
-          <li>
-            <div className="py-4 border-t border-b-2 border-gray-400 flex flex-row items-center">
-              <span style={{ flex: 3 }} className="text-gray-500 mr-4">
-                상품 이름
-              </span>
-              <span style={{ flex: 1 }} className="text-gray-500 mr-4">
-                추가 금액
-              </span>
-              <span style={{ flex: 1 }} className="text-gray-500 mr-4">
-                이미지
-              </span>
-              <span style={{ flex: 'none' }} className="text-gray-500  w-16">
-                {value.some((item: any) => item.delete === true) ? (
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    className="fill-current text-red-400 hover:text-red-600 cursor-pointer transition duration-100 ease-in-out"
-                    onClick={() => {
-                      let newValue = value.filter(
-                        (item: any) => item.delete === false
-                      );
-                      handleChange(name, newValue);
-                    }}
-                  >
-                    <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z" />
-                  </svg>
-                ) : (
-                  '삭제'
-                )}
-              </span>
-            </div>
-          </li>
-          {value.map((item: any, i: number) => {
-            return (
-              <li key={i}>
-                <div className="py-4 border-b border-gray-400 flex flex-row items-center">
-                  <span style={{ flex: 3 }} className="mr-4">
-                    <InputString
-                      name="optionName"
-                      value={item.name}
-                      onChange={(e: any) => {
-                        const newName = e.target.value;
-                        value.splice(i, 1, {
-                          ...item,
-                          name: newName,
-                        });
-                        handleChange(name, value);
-                      }}
-                    />
-                  </span>
-                  <span style={{ flex: 1 }} className="mr-4">
-                    <InputString
-                      name="optionName"
-                      type="number"
-                      value={item.price}
-                      onChange={(e: any) => {
-                        let newPrice = 0;
-                        if (e.target.value !== '') {
-                          newPrice = parseInt(e.target.value);
-                        }
-                        value.splice(i, 1, {
-                          ...item,
-                          price: newPrice,
-                        });
-                        handleChange(name, value);
-                      }}
-                    />
-                  </span>
-                  <span style={{ flex: 1 }} className="text-gray-500 mr-4">
-                    <InputImage
-                      label=""
-                      value={item.image}
-                      onChange={(url: any) => {
-                        value.splice(i, 1, {
-                          ...item,
-                          image: url,
-                        });
-                        handleChange(name, value);
-                      }}
-                      size="small"
-                      name="image"
-                    />
-                  </span>
-                  <span style={{ flex: 'none' }} className="text-gray-500 w-16">
-                    <InputCheckBox
-                      name="delete"
-                      value={item.delete}
-                      handleChange={() => {
-                        if (item.delete === true) {
-                          let newValue = [...value];
-                          newValue.splice(i, 1, {
-                            ...item,
-                            delete: false,
-                          });
-                          handleChange(name, newValue);
-                        } else {
-                          let newValue = [...value];
-                          newValue.splice(i, 1, {
-                            ...item,
-                            delete: true,
-                          });
-                          handleChange(name, newValue);
-                        }
-                      }}
-                    />
-                  </span>
-                </div>
-              </li>
-            );
-          })}
-          <li>
-            <div className="flex justify-center items-center mt-4">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                className="fill-current text-gray-400 hover:text-gray-600 cursor-pointer transition duration-100 ease-in-out"
-                onClick={() => {
-                  handleChange(name, [
-                    ...value,
-                    {
-                      name: '',
-                      price: 0,
-                      stock: 0,
-                      image: '',
-                      delete: false,
-                    },
-                  ]);
-                }}
-              >
-                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z" />
-              </svg>
-            </div>
-          </li>
-        </ul>
-      </div>
     </>
   );
 };

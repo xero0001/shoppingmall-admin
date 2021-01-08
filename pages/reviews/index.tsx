@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
-import FlatBigButton from '../../components/Button/FlatBigButton';
+// import FlatBigButton from '../../components/Button/FlatBigButton';
 import Loader from '../../components/Loader';
-import { initializeApollo } from '../../lib/apolloClient';
+// import { initializeApollo } from '../../lib/apolloClient';
 
 export const REVIEW_QUERY = gql`
   query review($where: ReviewWhereUniqueInput!) {
@@ -146,23 +146,9 @@ const Pagination = ({ count, value, setValue }: any) => {
 };
 
 const ReviewsList = ({ queryVars }: any) => {
-  const queryVariables = {
-    ...queryVars,
-    where: {
-      // category: {
-      //   some: {
-      //     id: { equals: queryVars.categoryId },
-      //   },
-      // },
-      title: {
-        contains: queryVars.searchString,
-      },
-    },
-  };
-
   const { loading, error, data } = useQuery(REVIEWS_QUERY, {
     // variables: queryVariables,
-    variables: {},
+    variables: queryVars,
     fetchPolicy: 'network-only',
   });
 
