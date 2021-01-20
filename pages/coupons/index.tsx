@@ -78,6 +78,9 @@ const IndexPage = () => {
 
   return (
     <Layout title="쿠폰/적립금">
+      <div className="text-2xl font-bold flex flex-row mt-8 ml-4">
+        <span>{'쿠폰/적립금 > 지급하기'}</span>
+      </div>
       <div className="max-w-screen-sm mx-auto block">
         <div className="px-4 py-8">
           <div className="flex flex-row justify-between items-center">

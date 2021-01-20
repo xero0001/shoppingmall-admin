@@ -36,7 +36,8 @@ const Nav = () => {
           <NavButton label="배너" href="/banners" />
           <hr className="mt-1" />
           <NavButton label="리뷰" href="/reviews" />
-          <NavButton label="쿠폰/적립금" href="/coupons" />
+          <NavButton label="쿠폰/적립금 전체지급" href="/coupons" />
+          <NavButton label="설정" href="/settings" />
         </div>
       </nav>
     </>
