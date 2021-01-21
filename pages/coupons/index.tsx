@@ -130,7 +130,7 @@ const IndexPage = () => {
               type="text"
             />
           </div>
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <InputString
               label="쿠폰 만료일"
               name="expiresAt"
@@ -138,7 +138,7 @@ const IndexPage = () => {
               handleChange={handleChange}
               type="number"
             />
-          </div>
+          </div> */}
         </div>
         <div className="px-4 py-8">
           <div className="flex flex-row justify-between items-center">
