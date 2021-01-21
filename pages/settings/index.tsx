@@ -92,6 +92,15 @@ const DiscountsForm = ({ meta }: any) => {
         </div>
         <div className="mt-4">
           <InputString
+            label="배송비"
+            name="logistics"
+            value={state.logistics}
+            handleChange={handleChange}
+            type="number"
+          />
+        </div>
+        <div className="mt-4">
+          <InputString
             label="무료배송 기준가격"
             name="freelogistics"
             value={state.freelogistics}
